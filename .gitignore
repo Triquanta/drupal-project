@@ -12,7 +12,6 @@ web/sites/*/files
 
 # Ignore environment specific settings
 build.properties.local
-!example.build.properties.local
 phpcs.xml
 tests/behat.yml
 
@@ -26,7 +25,7 @@ docroot/modules/develop
 
 # Ignore sensitive settings information in the external settings folder.
 settings/*
-!settings/example.*
+!settings/example_template.*
 !settings/README.txt
 
 # Ignore local settings.

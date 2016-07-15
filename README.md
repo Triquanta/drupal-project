@@ -46,6 +46,7 @@ When installing the given `composer.json` some tasks are taken care of:
 * Latest version of drush is installed locally for use at `vendor/bin/drush`.
 * Creates a `drushrc.php` file with a default Drush `-l` argument to simplify Drush usage for a single site using a Drupal multi-site setup.
 * Creates a site specific `aliases` file in the `drush`-directory.
+* Removes `.txt` files in the `docroot/core`-directory.
 * Latest version of DrupalConsole is installed locally for use at `vendor/bin/drupal`.
 
 ## Updating Drupal Core

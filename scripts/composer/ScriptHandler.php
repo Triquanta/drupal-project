@@ -39,8 +39,25 @@ class ScriptHandler {
     );
   }
 
+  /**
+   * Installs a fresh Drupal site.
+   *
+   * We asume that the database credentials can be read from the settings file.
+   *
+   * @param \Composer\Script\Event $event
+   */
   public static function installDrupal(Event $event) {
     $io = $event->getIO();
+    $docroot = static::getDrupalRoot(getcwd());
+
+    $account_name = $io->askAndValidate('Enter the administrator name (Default: gebruikereen): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, 'gebruikereen');
+    $account_pass = $io->ask('Enter the administrator password (Default: 123456): ', '123456');
+    $account_mail = $io->askAndValidate('Enter the administrator mail (Default: beheer@triquanta.nl): ', 'DrupalProject\composer\ScriptHandler::validateMail', NULL, 'beheer@triquanta.nl');
+    $site_name = $io->askAndValidate('Enter the site name: ', 'DrupalProject\composer\ScriptHandler::validateGenericName');
+    $site_mail = $io->askAndValidate('Enter the site mail (Default: beheer@triquanta.nl): ', 'DrupalProject\composer\ScriptHandler::validateMail', NULL, 'beheer@triquanta.nl');
+
+    exec("vendor/drush/drush/drush --account-mail=$account_mail --account-name='$account_name' --account-pass='$account_pass' --site-mail=$site_mail --site-name='$site_name' --root='$docroot' --yes site-install standard install_configure_form.update_status_module='array\(FALSE,FALSE\)'", $output);
+
   }
 
   // @todo prefer build file above questions (for CI).
@@ -65,6 +82,10 @@ class ScriptHandler {
 
     natsort($sites_directories);
 
+    // Add a 'new' site option.
+    $add_new_site_option = '- Add new site -';
+    $sites_directories = array_merge($sites_directories, [$add_new_site_option]);
+
     // If there are multiple site directories and 'default' is available,
     // move default to the bottom.
     $default_site_key = array_search('default', $sites_directories);
@@ -74,16 +95,15 @@ class ScriptHandler {
       $sites_directories[] = 'default';
     }
 
-    // Add a 'new' site option.
-    $sites_directories_options = array_merge($sites_directories, ['new']);
-
     // Highlight the default selection.
+    $sites_directories_options = $sites_directories;
     $sites_directories_options[0] = '<question>' . $sites_directories[0] . ' (Default, press enter to continue) </question>';
 
     $site_name_key = $io->select('Select the site to install or update: ',  $sites_directories_options, 0);
 
     // If new is selected, ask for a new site name.
-    if ($site_name_key == count($sites_directories_options) -1) {
+    $install_new = array_search($add_new_site_option, $sites_directories);
+    if ($site_name_key == $install_new) {
       $site_name = $io->askAndValidate('Enter the site name: ', 'DrupalProject\composer\ScriptHandler::validateGenericName');
     }
     else {
@@ -116,16 +136,14 @@ class ScriptHandler {
     // Add environment result to replaces map.
     $replaces += ['{{ environment_name }}' => $environment_name];
 
-    // Required directories.
+    // Required directories (for unit testing).
     $dirs = [
       'private_files/' . $site_name,
       $docroot . '/'. 'modules',
       $docroot . '/'. 'profiles',
       $docroot . '/'. 'themes',
-      $docroot . '/'. 'sites/' . $site_name,
     ];
 
-    // Required for unit testing
     foreach ($dirs as $dir) {
       if (!$fs->exists($dir)) {
         $fs->mkdir($dir);
@@ -133,9 +151,30 @@ class ScriptHandler {
       }
     }
 
+    // Cleanup.
+    $cleanup_files = [
+      $docroot . '/sites/development.services.yml',
+      $docroot . '/sites/example.settings.local.php',
+      $docroot . '/core/CHANGELOG.txt',
+      $docroot . '/core/COPYRIGHT.txt',
+      $docroot . '/core/INSTALL.mysql.txt',
+      $docroot . '/core/INSTALL.pgsql.txt',
+      $docroot . '/core/INSTALL.sqlite.txt',
+      $docroot . '/core/INSTALL.txt',
+      $docroot . '/core/LICENSE.txt',
+      $docroot . '/core/MAINTAINERS.txt',
+      $docroot . '/core/UPDATE.txt',
+    ];
+
+    foreach ($cleanup_files as $file) {
+      if ($fs->exists($file)) {
+        $fs->remove($file);
+      }
+    }
+
     // Prepare the sites.php file.
     $result_path = $docroot . '/sites/sites.php';
-    $example_path = $docroot . '/sites/example.sites.php';
+    $example_path = $docroot . '/sites/example_template.sites.php';
     if (!$fs->exists($result_path) and $fs->exists($example_path)) {
       $fs->copy($example_path, $result_path);
       static::fileSearchReplace($result_path, $replaces);
@@ -146,7 +185,7 @@ class ScriptHandler {
 
     // Prepare the settings file.
     $result_path = $docroot . '/sites/' . $site_name . '/settings.php';
-    $example_path = $docroot . '/sites/default/example.settings.php';
+    $example_path = $docroot . '/sites/default/example_template.settings.php';
     if (!$fs->exists($result_path) and $fs->exists($example_path)) {
       $fs->copy($example_path, $result_path);
       static::fileSearchReplace($result_path, $replaces);
@@ -157,7 +196,7 @@ class ScriptHandler {
 
     // Prepare the database settings file.
     $result_path = $project_root . '/settings/settings.' . $site_name . '.database.php';
-    $example_path = $project_root . '/settings/example.settings.database.php';
+    $example_path = $project_root . '/settings/example_template.settings.database.php';
     if (!$fs->exists($result_path) and $fs->exists($example_path)) {
       $replaces += ['{{ db_name }}' => $io->askAndValidate('Enter the database name (Default: ' . $site_name . '): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, $site_name)];
       $replaces += ['{{ db_user }}' => $io->askAndValidate('Enter the database user: ', 'DrupalProject\composer\ScriptHandler::validateGenericName')];
@@ -171,7 +210,7 @@ class ScriptHandler {
 
     // Prepare the drush aliases file.
     $result_path = $project_root . '/drush/' . $site_name . '.aliases.drushrc.php';
-    $example_path = $project_root . '/drush/example.aliases.drushrc.php';
+    $example_path = $project_root . '/drush/example_template.aliases.drushrc.php';
     if (!$fs->exists($result_path) and $fs->exists($example_path)) {
       $fs->copy($example_path, $result_path);
       static::fileSearchReplace($result_path, $replaces);
@@ -182,7 +221,7 @@ class ScriptHandler {
 
     // Prepare the drushrc.php settings file for installation
     $result_path = $project_root . '/drush/drushrc.php';
-    $example_path = $project_root . '/drush/example.drushrc.php';
+    $example_path = $project_root . '/drush/example_template.drushrc.php';
     if (!$fs->exists($result_path) and $fs->exists($example_path)) {
       // Ask the domain name.
       $domain_name = $io->askAndValidate('Enter the domain name for the site on this environment, press <enter> to use: http://' . $site_name . '.localhost: ', 'DrupalProject\composer\ScriptHandler::validateDomainName', NULL, 'http://' . $site_name . '.localhost');
@@ -211,14 +250,14 @@ class ScriptHandler {
     // Prepare the settings and services file for installation
     if ($environment_name != 'prod') {
       $result_path = $docroot . '/sites/' . $site_name . '/settings.' . $environment_name . '.php';
-      $example_path = $docroot . '/sites/default/example.settings.' . $environment_name . '.php';
+      $example_path = $docroot . '/sites/default/example_template.settings.' . $environment_name . '.php';
       if (!$fs->exists($result_path) and $fs->exists($example_path)) {
         $fs->copy($example_path, $result_path);
         $fs->chmod($result_path, 0640);
         $io->write("Created a $result_path file with chmod 0640.");
       }
       $result_path = $docroot . '/sites/' . $site_name . '/services.' . $environment_name . '.yml';
-      $example_path = $docroot . '/sites/default/example.services.' . $environment_name . '.yml';
+      $example_path = $docroot . '/sites/default/example_template.services.' . $environment_name . '.yml';
       if ($environment_name == 'dev' && !$fs->exists($result_path) and $fs->exists($example_path)) {
         $fs->copy($example_path, $result_path);
         $fs->chmod($result_path, 0640);
@@ -243,10 +282,20 @@ class ScriptHandler {
     if (empty($input)) {
       throw new \InvalidArgumentException('Input can\'t be empty');
     }
-      elseif (preg_match('/^[a-z0-9_]{2,32}$/', $input)) {
-        return $input;
-      }
-      throw new \InvalidArgumentException('Invalid input. Only lowercase alphanumeric characters and underscores are allowed and the input must be between 2 and 32 characters');
+    elseif (preg_match('/^[a-z0-9_]{2,32}$/', $input)) {
+      return $input;
+    }
+    throw new \InvalidArgumentException('Invalid input. Only lowercase alphanumeric characters and underscores are allowed and the input must be between 2 and 32 characters');
+  }
+
+  public static function validateMail($input) {
+    if (empty($input)) {
+      throw new \InvalidArgumentException('Email can\'t be empty');
+    }
+    elseif (!filter_var($input, FILTER_VALIDATE_EMAIL)) {
+      throw new \InvalidArgumentException('Invalid email.');
+    }
+    return $input;
   }
 
   public static function validateDomainName($input) {
