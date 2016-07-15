@@ -1,14 +1,5 @@
 # Composer template for Drupal projects
 
-[![Build Status](https://travis-ci.org/drupal-composer/drupal-project.svg?branch=8.x)](https://travis-ci.org/drupal-composer/drupal-project)
-
-This project template should provide a kickstart for managing your site
-dependencies with [Composer](https://getcomposer.org/).
-
-If you want to know how to use it as replacement for
-[Drush Make](https://github.com/drush-ops/drush/blob/master/docs/make.md) visit
-the [Documentation on drupal.org](https://www.drupal.org/node/2471553).
-
 ## Usage
 
 First you need to [install composer](https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx).
@@ -17,37 +8,44 @@ First you need to [install composer](https://getcomposer.org/doc/00-intro.md#ins
 You might need to replace `composer` with `php composer.phar` (or similar) 
 for your setup.
 
-After that you can create the project:
+After that you can install all vendor packages (this includes Drupal Core and Contrib) and prepare the project file structure. 
+After downloading the vendor packages some site specific questions will be asked (if necessary).
 
 ```
-composer create-project drupal-composer/drupal-project:8.x-dev some-dir --stability dev --no-interaction
+git clone https://github.com/Triquanta/drupal-project.git
+mv drupal-project <project_name>
+cd <project_name>
+composer install
 ```
 
 With `composer require ...` you can download new dependencies to your 
 installation.
 
 ```
-cd some-dir
-composer require drupal/devel:8.*
+composer require drupal/diff:8.*
 ```
-
-The `composer create-project` command passes ownership of all files to the 
-project that is created. You should create a new git repository, and commit 
-all files not excluded by the .gitignore file.
 
 ## What does the template do?
 
 When installing the given `composer.json` some tasks are taken care of:
 
-* Drupal will be installed in the `web`-directory.
+* Drupal will be installed in the `docroot`-directory.
+* A site folder and files structure will be generated following Drupal's multi-site setup.
+* Access to Drupal's `default` site is blocked.
 * Autoloader is implemented to use the generated composer autoloader in `vendor/autoload.php`,
-  instead of the one provided by Drupal (`web/vendor/autoload.php`).
-* Modules (packages of type `drupal-module`) will be placed in `web/modules/contrib/`
-* Theme (packages of type `drupal-theme`) will be placed in `web/themes/contrib/`
-* Profiles (packages of type `drupal-profile`) will be placed in `web/profiles/contrib/`
-* Creates default writable versions of `settings.php` and `services.yml`.
-* Creates `sites/default/files`-directory.
+  instead of the one provided by Drupal (`docroot/vendor/autoload.php`).
+* Modules (packages of type `drupal-module`) will be placed in `docroot/modules/contrib/`
+* Theme (packages of type `drupal-theme`) will be placed in `docroot/themes/contrib/`
+* Profiles (packages of type `drupal-profile`) will be placed in `docroot/profiles/contrib/`
+* Creates a default writable version of `settings.php`.
+* Creates `docroot/sites/{{ site_name }}/files`-directory.
+* Creates environment specific `settings` and `services` files in the `docroot/sites/{{ site_name }}`-directory.
+* Creates site specific database settings outside the `docroot`-directory in the `settings`-directory.
+* Creates a site specific `sites.php` file in the `docrtoos/sites`-directory.
+* Creates `config`-directory.
 * Latest version of drush is installed locally for use at `vendor/bin/drush`.
+* Creates a `drushrc.php` file with a default Drush `-l` argument to simplify Drush usage for a single site using a Drupal multi-site setup.
+* Creates a site specific `aliases` file in the `drush`-directory.
 * Latest version of DrupalConsole is installed locally for use at `vendor/bin/drupal`.
 
 ## Updating Drupal Core
@@ -65,7 +63,7 @@ Follow the steps below to update your core files.
 1. Run `git diff` to determine if any of the scaffolding files have changed. 
    Review the files for any changes and restore any customizations to 
   `.htaccess` or `robots.txt`.
-1. Commit everything all together in a single commit, so `web` will remain in
+1. Commit everything all together in a single commit, so `docroot` will remain in
    sync with the `core` when checking out branches or running `git bisect`.
 1. In the event that there are non-trivial conflicts in step 2, you may wish 
    to perform these steps on a branch, and use `git merge` to combine the 
@@ -74,101 +72,57 @@ Follow the steps below to update your core files.
    keeping all of your modifications at the beginning or end of the file is a 
    good strategy to keep merges easy.
 
-## Generate composer.json from existing project
-
-With using [the "Composer Generate" drush extension](https://www.drupal.org/project/composer_generate)
-you can now generate a basic `composer.json` file from an existing project. Note
-that the generated `composer.json` might differ from this project's file.
-
-
-## Customize build properties
-
-Create a new file in the root of the project named `build.properties.local`
-using your favourite text editor:
-
-```
-$ vim build.properties.local
-```
-
-This file will contain configuration which is unique to your development
-machine. This is mainly useful for specifying your database credentials and the
-username and password of the Drupal admin user so they can be used during the
-installation.
-
-Because these settings are personal they should not be shared with the rest of
-the team. Make sure you never commit this file!
-
-All options you can use can be found in the `build.properties.dist` file. Just
-copy the lines you want to override and change their values. For example:
-
-```
-# The location of the Composer binary.
-composer.bin = /usr/bin/composer
-
-# Database settings.
-drupal.db.name = my_database
-drupal.db.user = root
-drupal.db.password = hunter2
-
-# Admin user.
-drupal.admin.username = admin
-drupal.admin.password = admin
-
-# The base URL to use in Behat tests.
-behat.base_url = http://platform.local
-
-# Verbosity of Drush commands. Set to 'yes' for verbose output.
-drush.verbose = yes
-```
-
-
 ## Listing the available build commands
 
-You can get a list of all the available Phing build commands ("targets") with a
-short description of each target with the following command:
+You can get a list of all the available composer build commands with:
 
 ```
-$ ./vendor/bin/phing
+$ composer list
 ```
 
+## Creating / adding a (multi) site
 
-## Install the website.
+If you don't want to run `composer update/install` you can manually run the
+script that prepares an environment specific site and file structure by
+executing:
 
 ```
-$ ./vendor/bin/phing install
+$ composer run-script post-install-cmd
 ```
 
+Note, Drupals multi-site setup is used, but the script doesn't work 100% for
+multiple sites. So review sites.php after adding another site.
 
 ## Set up tools for the development environment
 
-If you want to install a version suitable for development you can execute the
-`setup-dev` Phing target.
-
-```
-$ ./vendor/bin/phing setup-dev
-```
+If you chose `dev` as environment during `composer install/update`
 
 This will perform the following tasks:
 
-1. Configure Behat.
-2. Configure PHP CodeSniffer.
-3. Enable 'development mode'. This will:
-  * Enable the services in `development.services.yml`.
+1. @todo Configure Behat.
+1. @todo Configure PHP CodeSniffer.
+1. Enable 'development mode'. This will:
+  * Enable the services in `services.dev.yml`.
   * Show all error messages with backtrace information.
   * Disable CSS and JS aggregation.
   * Disable the render cache.
   * Allow test modules and themes to be installed.
   * Enable access to `rebuild.php`.
-4. Enable development modules.
-5. Create a demo user for each user role.
 
-To set up a development environment quickly, you can perform both the `install`
-and `setup-dev` targets at once by executing `install-dev`:
+## Install the website.
+
+@todo A fresh standard Drupal site can be installed by executing:
 
 ```
-$ ./vendor/bin/phing install-dev
+$ composer drupal-install
 ```
 
+Database settings will be read from file and credentials can be chosen (@todo).
+
+If you chose a `dev` environment the following tasks will also be performed:
+
+1. @todo Enable development modules.
+1. @todo Create a demo user for each user role.
 
 ## Running Behat tests
 
@@ -203,16 +157,15 @@ $ ./vendor/bin/behat -c tests/behat.yml
 
 PHP CodeSniffer is included to do coding standards checks of PHP and JS files.
 In the default configuration it will scan all files in the following folders:
-- `web/modules` (excluding `web/modules/contrib`)
-- `web/profiles`
-- `web/themes`
+- `docroot/modules` (excluding `docroot/modules/contrib`)
+- `docroot/profiles`
+- `docroot/themes`
 
-First you'll need to execute the `setup-php-codesniffer` Phing target (note that
-this also runs as part of the `install-dev` and `setup-dev` targets):
-
-```
-$ ./vendor/bin/phing setup-php-codesniffer
-```
+First you'll need to setup a `dev` environment using `composer install/update` or by running:
+ 
+ ```
+ $ composer run-script post-install-cmd
+ ```
 
 This will generate a `phpcs.xml` file containing settings specific to your local
 environment. Make sure to never commit this file.
@@ -228,59 +181,17 @@ The coding standards checks can then be run as follows:
 $ ./vendor/bin/phpcs
 
 # Scan only a single folder.
-$ ./vendor/bin/phpcs web/modules/custom/mymodule
+$ ./vendor/bin/phpcs docroot/modules/custom/mymodule
 ```
 
 #### Run checks automatically when pushing
 
-To save yourself the embarrassment of pushing non-compliant code to the git
-repository you can put the following line in your `build.properties.local`:
-
-```
-# Whether or not to run a coding standards check before doing a git push. Note
-# that this will abort the push if the coding standards check fails.
-phpcs.prepush.enable = 1
-```
-
-and then regenerate your PHP CodeSniffer configuration:
-
-```
-$ ./vendor/bin/phing setup-php-codesniffer
-```
-
-If your project requires all team members to follow coding standards, put this
-line in the project configuration (`build.properties`) instead.
-
-Note that this will not allow you to push any code that fails the coding
-standards check. If you really need to push in a hurry, then you can disable
-the coding standards check by executing this Phing target:
-
-```
-$ ./vendor/bin/phing disable-pre-push
-```
-
-The pre-push hook will be reinstated when the `setup-php-codesniffer` target
-is executed.
+@todo
 
 
 ### Customize configuration
 
-The basic configuration can be changed by copying the relevant Phing properties
-from the "PHP CodeSniffer configuration" section in `build.properties.dist` to
-`build.properties` and changing them to your requirements. Then regenerate the
-`phpcs.xml` file by running the `setup-php-codesniffer` target:
-
-```
-$ ./vendor/bin/phing setup-php-codesniffer
-```
-
-To change to PHP CodeSniffer ruleset itself, make a copy of the file
-`phpcs-ruleset.xml.dist` and rename it to `phpcs-ruleset.xml`, and then put this
-line in your `build.properties` file:
-
-```
-phpcs.standard = ${project.basedir}/phpcs-ruleset.xml
-```
+@todo
 
 For more information on configuring the ruleset see [Annotated ruleset](http://pear.php.net/manual/en/package.php.php-codesniffer.annotated-ruleset.php).
 
@@ -309,3 +220,7 @@ section of composer.json:
     }
 }
 ```
+
+## Notes
+
+This template is based on: https://github.com/pfrenssen/drupal-project, but without usage of Phing and with Triquanta specific thingies.
