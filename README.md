@@ -112,13 +112,16 @@ This will perform the following tasks:
 
 ## Install the website.
 
-@todo A fresh standard Drupal site can be installed by executing:
+A fresh standard Drupal site can be installed by executing:
 
 ```
 $ composer drupal-install
 ```
 
-Database settings will be read from file and credentials can be chosen (@todo).
+Note: make sure you already have a working database, setup with credentials as
+given during `composer update/install`.
+
+Database settings will be read from file and account credentials can be chosen.
 
 If you chose a `dev` environment the following tasks will also be performed:
 
