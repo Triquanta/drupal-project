@@ -1,30 +1,5 @@
 # Composer template for Drupal projects
 
-## Usage
-
-First you need to [install composer](https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx).
-
-> Note: The instructions below refer to the [global composer installation](https://getcomposer.org/doc/00-intro.md#globally).
-You might need to replace `composer` with `php composer.phar` (or similar) 
-for your setup.
-
-After that you can install all vendor packages (this includes Drupal Core and Contrib) and prepare the project file structure. 
-After downloading the vendor packages some site specific questions will be asked (if necessary).
-
-```
-git clone https://github.com/Triquanta/drupal-project.git
-mv drupal-project <project_name>
-cd <project_name>
-composer install
-```
-
-With `composer require ...` you can download new dependencies to your 
-installation.
-
-```
-composer require drupal/diff:8.*
-```
-
 ## What does the template do?
 
 When installing the given `composer.json` some tasks are taken care of:
@@ -49,6 +24,49 @@ When installing the given `composer.json` some tasks are taken care of:
 * Removes `.txt` files in the `docroot/core`-directory.
 * Latest version of DrupalConsole is installed locally for use at `vendor/bin/drupal`.
 
+## Usage, start here!
+
+First you need to [install composer](https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx).
+
+> Note: The instructions below refer to the [global composer installation](https://getcomposer.org/doc/00-intro.md#globally).
+You might need to replace `composer` with `php composer.phar` (or similar) 
+for your setup.
+
+After that you can install all vendor packages (this includes Drupal Core and Contrib) and prepare the project file structure. 
+After downloading the vendor packages some site specific questions will be asked (if necessary).
+
+```
+git clone https://github.com/Triquanta/drupal-project.git
+mv drupal-project <project_name>
+cd <project_name>
+composer install
+```
+
+Note: with `composer require ...` you can download new dependencies to your 
+installation.
+
+```
+composer require drupal/diff:8.*
+```
+
+## Install a website
+
+A fresh standard Drupal site can be installed by executing:
+
+```
+$ composer drupal-install
+```
+
+Note: make sure you already have a working database, setup with credentials as
+given during `composer update/install`.
+
+Database settings will be read from file and account credentials can be chosen.
+
+If you chose a `dev` environment the following tasks will also be performed:
+
+1. @todo Enable development modules.
+1. @todo Create a demo user for each user role.
+
 ## Updating Drupal Core
 
 This project will attempt to keep all of your Drupal Core files up-to-date; the 
@@ -72,14 +90,6 @@ Follow the steps below to update your core files.
    of a [three-way merge tool such as kdiff3](http://www.gitshah.com/2010/12/how-to-setup-kdiff-as-diff-tool-for-git.html). This setup is not necessary if your changes are simple; 
    keeping all of your modifications at the beginning or end of the file is a 
    good strategy to keep merges easy.
-
-## Listing the available build commands
-
-You can get a list of all the available composer build commands with:
-
-```
-$ composer list
-```
 
 ## Creating / adding a (multi) site
 
@@ -110,24 +120,6 @@ This will perform the following tasks:
   * Allow test modules and themes to be installed.
   * Enable access to `rebuild.php`.
 
-## Install the website.
-
-A fresh standard Drupal site can be installed by executing:
-
-```
-$ composer drupal-install
-```
-
-Note: make sure you already have a working database, setup with credentials as
-given during `composer update/install`.
-
-Database settings will be read from file and account credentials can be chosen.
-
-If you chose a `dev` environment the following tasks will also be performed:
-
-1. @todo Enable development modules.
-1. @todo Create a demo user for each user role.
-
 ## Running Behat tests
 
 The Behat test suite is located in the `tests/` folder. The easiest way to run
@@ -156,6 +148,8 @@ $ ./vendor/bin/behat -c tests/behat.yml
 
 
 ## Checking for coding standards violations
+
+@todo This section is not functional!
 
 ### Set up PHP CodeSniffer
 
