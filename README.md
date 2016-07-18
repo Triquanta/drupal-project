@@ -120,7 +120,7 @@ This will perform the following tasks:
   * Allow test modules and themes to be installed.
   * Enable access to `rebuild.php`.
 
-## Importing configuration in a freshly installed sited
+## Importing configuration in a freshly installed site
 
 If you want to import config, but you did a fresh install you'll have to execute the following steps first.
 
