@@ -50,6 +50,9 @@ class ScriptHandler {
     $io = $event->getIO();
     $docroot = static::getDrupalRoot(getcwd());
 
+    // First prepare our file structure.
+    static::prepareDrupal($event);
+
     $account_name = $io->askAndValidate('Enter the administrator name (Default: gebruikereen): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, 'gebruikereen');
     $account_pass = $io->ask('Enter the administrator password (Default: 123456): ', '123456');
     $account_mail = $io->askAndValidate('Enter the administrator mail (Default: beheer@triquanta.nl): ', 'DrupalProject\composer\ScriptHandler::validateMail', NULL, 'beheer@triquanta.nl');
@@ -60,13 +63,32 @@ class ScriptHandler {
 
   }
 
-  // @todo prefer build file above questions (for CI).
-  public static function createRequiredFiles(Event $event) {
+  /**
+   * Prepares a Drupal project.
+   *
+   * This is often only needed once.
+   *
+   * @todo add force overwrite arg or something
+   *
+   * @param \Composer\Script\Event $event
+   */
+  public static function prepareDrupal(Event $event) {
     $io = $event->getIO();
-    $args = $event->getArguments();
+    $args = [];
+    $args_raw = $event->getArguments();
     $fs = new Filesystem();
     $project_root = getcwd();
     $docroot = static::getDrupalRoot($project_root);
+
+    // Process arguments. (Need to be entered in the form --arg=value or --arg).
+    // @todo load args from build file also.
+    foreach ($args_raw as $arg_raw) {
+      $parts = explode('=', $arg_raw);
+      if (count($parts) == 1 || count($parts) == 2) {
+        $arg_key = trim($parts[0], '-');
+        $args[$arg_key] = isset($parts[1]) ? $parts[1] : TRUE;
+      }
+    }
 
     // All multisite sites folder names.
     $sites_directories = [];
@@ -95,20 +117,34 @@ class ScriptHandler {
       $sites_directories[] = 'default';
     }
 
-    // Highlight the default selection.
-    $sites_directories_options = $sites_directories;
-    $sites_directories_options[0] = '<question>' . $sites_directories[0] . ' (Default, press enter to continue) </question>';
-
-    $site_name_key = $io->select('Select the site to install or update: ',  $sites_directories_options, 0);
-
-    // If new is selected, ask for a new site name.
-    $install_new = array_search($add_new_site_option, $sites_directories);
-    if ($site_name_key == $install_new) {
-      $site_name = $io->askAndValidate('Enter the site name: ', 'DrupalProject\composer\ScriptHandler::validateGenericName');
+    if (!empty($args['site_name']) && static::validateGenericName($args['site_name'])){
+      $site_name = $args['site_name'];
+      $io->write("Using <info>$site_name</info> as site.");
     }
-    else {
-      $site_name = $sites_directories[$site_name_key];
+    // If there is only one multi site folder, use that folder name as site_name.
+    elseif (($default_site_key !== FALSE && count($sites_directories) == 3) || ($default_site_key === FALSE && count($sites_directories) == 2))  {
+      $site_name = reset($sites_directories);
+      $io->write("Found $site_name directory in docroot/sites, using <info>$site_name</info> as site.");
     }
+
+    // If no site_name is set we need some manual input.
+    if (empty($site_name)) {
+      // Highlight the default selection.
+      $sites_directories_options = $sites_directories;
+      $sites_directories_options[0] = '<question>' . $sites_directories[0] . ' (Default, press enter to continue) </question>';
+
+      $site_name_key = $io->select('Select the site to install or update: ',  $sites_directories_options, 0);
+
+      // If new is selected, ask for a new site name.
+      $install_new = array_search($add_new_site_option, $sites_directories);
+      if ($site_name_key == $install_new) {
+        $site_name = $io->askAndValidate('Enter the site name: ', 'DrupalProject\composer\ScriptHandler::validateGenericName');
+      }
+      else {
+        $site_name = $sites_directories[$site_name_key];
+      }
+    }
+
     // Add site name result to replaces map.
     $replaces += ['{{ site_name }}' => $site_name];
 
@@ -125,8 +161,13 @@ class ScriptHandler {
       }
     }
 
-    // Ask the environment if no environment specific settings file is found.
-    if (empty($environment_name)) {
+    // Check if we have an argument with the environment set.
+    if (!empty($args['env']) && in_array($args['env'], $environments)) {
+      $environment_name = $args['env'];
+      $io->write("Using <info>$environment_name</info> as environment.");
+    }
+    // Otherwise ask the environment if no environment specific settings file is found.
+    elseif (empty($environment_name)) {
       // Mark default choice.
       $environment_options[0] = '<question>prod (Default, press enter to continue)</question>';
       $environment_key = $io->select('Select the environment: ', $environment_options, 0);
@@ -195,9 +236,11 @@ class ScriptHandler {
     }
 
     // Prepare the database settings file.
+    // This step can be skipped by giving the argument --skip_db.
+    // This is useful for continuous integration and build servers.
     $result_path = $project_root . '/settings/settings.' . $site_name . '.database.php';
     $example_path = $project_root . '/settings/example_template.settings.database.php';
-    if (!$fs->exists($result_path) and $fs->exists($example_path)) {
+    if (!$fs->exists($result_path) and $fs->exists($example_path) && empty($args['skip_db'])) {
       $replaces += ['{{ db_name }}' => $io->askAndValidate('Enter the database name (Default: ' . $site_name . '): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, $site_name)];
       $replaces += ['{{ db_user }}' => $io->askAndValidate('Enter the database user: ', 'DrupalProject\composer\ScriptHandler::validateGenericName')];
       $replaces += ['{{ db_password }}' => $io->askAndHideAnswer('Enter the database password (hidden): ')];
@@ -220,9 +263,11 @@ class ScriptHandler {
     }
 
     // Prepare the drushrc.php settings file for installation
+    // This step can be skipped by giving the argument --skip_drushrc.
+    // This is useful for continuous integration and build servers.
     $result_path = $project_root . '/drush/drushrc.php';
     $example_path = $project_root . '/drush/example_template.drushrc.php';
-    if (!$fs->exists($result_path) and $fs->exists($example_path)) {
+    if (!$fs->exists($result_path) and $fs->exists($example_path) && empty($args['skip_drushrc'])) {
       // Ask the domain name.
       $domain_name = $io->askAndValidate('Enter the domain name for the site on this environment, press <enter> to use: http://' . $site_name . '.localhost: ', 'DrupalProject\composer\ScriptHandler::validateDomainName', NULL, 'http://' . $site_name . '.localhost');
       // Add domain name result to replaces map.

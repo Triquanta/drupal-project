@@ -68,18 +68,13 @@
   },
   "scripts": {
     "drupal-scaffold": "DrupalComposer\\DrupalScaffold\\Plugin::scaffold",
+    "drupal-prepare": "DrupalProject\\composer\\ScriptHandler::prepareDrupal",
     "drupal-install": "DrupalProject\\composer\\ScriptHandler::installDrupal",
     "pre-install-cmd": [
       "DrupalProject\\composer\\ScriptHandler::checkComposerVersion"
     ],
     "pre-update-cmd": [
       "DrupalProject\\composer\\ScriptHandler::checkComposerVersion"
-    ],
-    "post-install-cmd": [
-      "DrupalProject\\composer\\ScriptHandler::createRequiredFiles"
-    ],
-    "post-update-cmd": [
-      "DrupalProject\\composer\\ScriptHandler::createRequiredFiles"
     ]
   },
   "extra": {

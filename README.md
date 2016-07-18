@@ -32,8 +32,7 @@ First you need to [install composer](https://getcomposer.org/doc/00-intro.md#ins
 You might need to replace `composer` with `php composer.phar` (or similar) 
 for your setup.
 
-After that you can install all vendor packages (this includes Drupal Core and Contrib) and prepare the project file structure. 
-After downloading the vendor packages some site specific questions will be asked (if necessary).
+After that you can install all vendor packages (this includes Drupal Core and Contrib). 
 
 ```
 git clone https://github.com/Triquanta/drupal-project.git
@@ -57,6 +56,8 @@ A fresh standard Drupal site can be installed by executing:
 $ composer drupal-install
 ```
 
+First the file structure will be prepared, some site specific questions will be asked (if necessary).
+
 Note: make sure you already have a working database, setup with credentials as
 given during `composer update/install`.
 
@@ -66,6 +67,21 @@ If you chose a `dev` environment the following tasks will also be performed:
 
 1. @todo Enable development modules.
 1. @todo Create a demo user for each user role.
+
+## Prepare a site specific codebase
+
+You can prepare the Drupal site file structure with the following command:   
+
+```
+$ composer drupal-prepare
+```
+
+This will do the part of the magic mentioned in `What does the template do`, which is not covered by a plain `composer install`.
+
+Note: if you want to install a clean Drupal site as well, use the `composer drupal-install` command instead.
+
+Note2: Drupal's multi-site setup is used, but the script doesn't work 100% for
+multiple sites. So review sites.php after adding another site.
 
 ## Updating Drupal Core
 
@@ -90,19 +106,6 @@ Follow the steps below to update your core files.
    of a [three-way merge tool such as kdiff3](http://www.gitshah.com/2010/12/how-to-setup-kdiff-as-diff-tool-for-git.html). This setup is not necessary if your changes are simple; 
    keeping all of your modifications at the beginning or end of the file is a 
    good strategy to keep merges easy.
-
-## Creating / adding a (multi) site
-
-If you don't want to run `composer update/install` you can manually run the
-script that prepares an environment specific site and file structure by
-executing:
-
-```
-$ composer run-script post-install-cmd
-```
-
-Note, Drupals multi-site setup is used, but the script doesn't work 100% for
-multiple sites. So review sites.php after adding another site.
 
 ## Set up tools for the development environment
 
