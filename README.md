@@ -12,7 +12,7 @@ When installing the given `composer.json` some tasks are taken care of:
 * Modules (packages of type `drupal-module`) will be placed in `docroot/modules/contrib/`
 * Theme (packages of type `drupal-theme`) will be placed in `docroot/themes/contrib/`
 * Profiles (packages of type `drupal-profile`) will be placed in `docroot/profiles/contrib/`
-* Creates a default writable version of `settings.php`.
+* Creates a default writable version of `settings.php` suitable for a production environment.
 * Creates `docroot/sites/{{ site_name }}/files`-directory.
 * Creates environment specific `settings` and `services` files in the `docroot/sites/{{ site_name }}`-directory.
 * Creates site specific database settings outside the `docroot`-directory in the `settings`-directory.
@@ -119,6 +119,25 @@ This will perform the following tasks:
   * Disable the render cache.
   * Allow test modules and themes to be installed.
   * Enable access to `rebuild.php`.
+
+## Importing configuration in a freshly installed sited
+
+If you want to import config, but you did a fresh install you'll have to execute the following steps first.
+
+1. Copy the the `uuid` value from `config/system.site.yml`.
+1. Execute the following commands, replace `<uuid>` for the copied version.
+    ```
+    $ cd docroot
+    $ drush config-set system.site uuid <uuid>
+    ```
+1. Remove the shortcut entities which where created during the clean install.
+    ```
+    $ drush php-eval '\Drupal::entityManager()->getStorage("shortcut_set")->load("default")->delete();'
+    ```
+1. Then finally you can do:
+    ```
+    $ drush config-import
+    ```
 
 ## Running Behat tests
 
