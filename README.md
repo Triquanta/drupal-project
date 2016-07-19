@@ -35,8 +35,7 @@ for your setup.
 After that you can install all vendor packages (this includes Drupal Core and Contrib). 
 
 ```
-git clone https://github.com/Triquanta/drupal-project.git
-mv drupal-project <project_name>
+git clone https://github.com/Triquanta/drupal-project.git <project_name>
 cd <project_name>
 composer install
 ```

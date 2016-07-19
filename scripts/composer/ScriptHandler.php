@@ -319,7 +319,7 @@ class ScriptHandler {
       $io->write("Create a $result_path directory with chmod 0755");
     }
 
-    $io->write("<info>Install/Update script done</info>");
+    $io->write("<info>Preperation logic done</info>");
 
   }
 
