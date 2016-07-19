@@ -216,23 +216,34 @@ class ScriptHandler {
     // Prepare the sites.php file.
     $result_path = $docroot . '/sites/sites.php';
     $example_path = $docroot . '/sites/example_template.sites.php';
-    if (!$fs->exists($result_path) and $fs->exists($example_path)) {
+    $result_exists = $fs->exists($result_path);
+    if (!$result_exists && $fs->exists($example_path)) {
       $fs->copy($example_path, $result_path);
       static::fileSearchReplace($result_path, $replaces);
       $fs->chmod($result_path, 0640);
       $io->write("Created a $result_path file with chmod 0640.");
       $io->write("<warning>Review and update sites.php later, to make sure all domain names will work.</warning>");
     }
+    elseif ($result_exists) {
+      $io->write("Found existing sites.php file: <info>$result_path</info>.");
+    }
 
     // Prepare the settings file.
     $result_path = $docroot . '/sites/' . $site_name . '/settings.php';
     $example_path = $docroot . '/sites/default/example_template.settings.php';
-    if (!$fs->exists($result_path) and $fs->exists($example_path)) {
+    $result_exists = $fs->exists($result_path);
+    if (!$result_exists && $fs->exists($example_path)) {
       $fs->copy($example_path, $result_path);
       static::fileSearchReplace($result_path, $replaces);
       $fs->chmod($result_path, 0640);
       $io->write("Created a $result_path file with chmod 0640.");
       $io->write("<warning>Review and update the trusted_host_patterns in settings.php later, to make sure your domain name will work.</warning>");
+    }
+    elseif ($result_exists) {
+      $io->write("Found existing sites.php file: <info>$result_path</info>.");
+    }
+    else {
+      $io->write("<error>Couldn't prepare sites.php.</error>.");
     }
 
     // Prepare the database settings file.
@@ -240,7 +251,8 @@ class ScriptHandler {
     // This is useful for continuous integration and build servers.
     $result_path = $project_root . '/settings/settings.' . $site_name . '.database.php';
     $example_path = $project_root . '/settings/example_template.settings.database.php';
-    if (!$fs->exists($result_path) and $fs->exists($example_path) && empty($args['skip_db'])) {
+    $result_exists = $fs->exists($result_path);
+    if (!$result_exists && $fs->exists($example_path) && empty($args['skip_db'])) {
       $replaces += ['{{ db_name }}' => $io->askAndValidate('Enter the database name (Default: ' . $site_name . '): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, $site_name)];
       $replaces += ['{{ db_user }}' => $io->askAndValidate('Enter the database user: ', 'DrupalProject\composer\ScriptHandler::validateGenericName')];
       $replaces += ['{{ db_password }}' => $io->askAndHideAnswer('Enter the database password (hidden): ')];
@@ -250,16 +262,32 @@ class ScriptHandler {
       $fs->chmod($result_path, 0640);
       $io->write("Created a $result_path file with chmod 0640.");
     }
+    elseif (!empty($args['skip_db'])) {
+      $io->write("<info>Skipping database settings file setup.</info>.");
+    }
+    elseif ($result_exists) {
+      $io->write("Found existing database settings file: <info>$result_path</info>.");
+    }
+    else {
+      $io->write("<error>Couldn't prepare database settings file.</error>.");
+    }
 
     // Prepare the drush aliases file.
     $result_path = $project_root . '/drush/' . $site_name . '.aliases.drushrc.php';
     $example_path = $project_root . '/drush/example_template.aliases.drushrc.php';
-    if (!$fs->exists($result_path) and $fs->exists($example_path)) {
+    $result_exists = $fs->exists($result_path);
+    if (!$result_exists && $fs->exists($example_path)) {
       $fs->copy($example_path, $result_path);
       static::fileSearchReplace($result_path, $replaces);
       $fs->chmod($result_path, 0640);
       $io->write("Created a $result_path file with chmod 0640.");
       $io->write("<warning>Review and update the aliases file, to make sure all aliases will work.</warning>");
+    }
+    elseif ($result_exists) {
+      $io->write("Found existing Drush alias file: <info>$result_path</info>.");
+    }
+    else {
+      $io->write("<error>Couldn't prepare Drush alias file.</error>.");
     }
 
     // Prepare the drushrc.php settings file for installation
@@ -267,7 +295,8 @@ class ScriptHandler {
     // This is useful for continuous integration and build servers.
     $result_path = $project_root . '/drush/drushrc.php';
     $example_path = $project_root . '/drush/example_template.drushrc.php';
-    if (!$fs->exists($result_path) and $fs->exists($example_path) && empty($args['skip_drushrc'])) {
+    $result_exists = $fs->exists($result_path);
+    if (!$result_exists && $fs->exists($example_path) && empty($args['skip_drushrc'])) {
       // Ask the domain name.
       $domain_name = $io->askAndValidate('Enter the domain name for the site on this environment, press <enter> to use: http://' . $site_name . '.localhost: ', 'DrupalProject\composer\ScriptHandler::validateDomainName', NULL, 'http://' . $site_name . '.localhost');
       // Add domain name result to replaces map.
@@ -279,7 +308,7 @@ class ScriptHandler {
       $io->write("Created a $result_path file with chmod 0640.");
     }
     // A drushrc.php is already present.
-    elseif ($fs->exists($result_path)) {
+    elseif ($result_exists) {
       $drushrc_file = file_get_contents($result_path);
       // Find domain name (commented lines are not taken into account).
       preg_match_all('/\s*\$options\[[\'\"]l[\'\"]\]\s*=\s*[\'\"](.*)[\'\"];/', $drushrc_file, $matches);
@@ -291,23 +320,41 @@ class ScriptHandler {
         $io->write("<warning>No domain name found in the file $result_path!");
       }
     }
+    elseif (!empty($args['skip_drushrc'])) {
+      $io->write("<info>Skipping drushrc.php file setup.</info>.");
+    }
+    else {
+      $io->write("<error>Couldn't prepare database settings file.</error>.");
+    }
 
-    // Prepare the settings and services file for installation
+    // Prepare the environment specific settings and services files.
     if ($environment_name != 'prod') {
       $result_path = $docroot . '/sites/' . $site_name . '/settings.' . $environment_name . '.php';
       $example_path = $docroot . '/sites/default/example_template.settings.' . $environment_name . '.php';
-      if (!$fs->exists($result_path) and $fs->exists($example_path)) {
+      $result_exists = $fs->exists($result_path);
+      if (!$result_exists && $fs->exists($example_path)) {
         $fs->copy($example_path, $result_path);
         $fs->chmod($result_path, 0640);
         $io->write("Created a $result_path file with chmod 0640.");
       }
+      elseif ($result_exists) {
+        $io->write("Found existing environment specific settings file: <info>$result_path</info>.");
+      }
+
       $result_path = $docroot . '/sites/' . $site_name . '/services.' . $environment_name . '.yml';
       $example_path = $docroot . '/sites/default/example_template.services.' . $environment_name . '.yml';
-      if ($environment_name == 'dev' && !$fs->exists($result_path) and $fs->exists($example_path)) {
+      $result_exists = $fs->exists($result_path);
+      if ($environment_name == 'dev' && !$result_exists && $fs->exists($example_path)) {
         $fs->copy($example_path, $result_path);
         $fs->chmod($result_path, 0640);
         $io->write("Created a $result_path file with chmod 0640.");
       }
+      elseif ($result_exists) {
+        $io->write("Found existing services file: <info>$result_path</info>.");
+      }
+    }
+    else {
+      $io->write("<info>No environment specific settings and services needed (default is production).</info>");
     }
 
     // Create the files directory with chmod 0755
@@ -319,7 +366,7 @@ class ScriptHandler {
       $io->write("Create a $result_path directory with chmod 0755");
     }
 
-    $io->write("<info>Preperation logic done</info>");
+    $io->write("<info>Preparation logic done.</info>");
 
   }
 
