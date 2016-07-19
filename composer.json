@@ -95,5 +95,21 @@
         "type:drupal-drush"
       ]
     }
+  },
+  "drupal-scaffold": {
+    "excludes": [],
+    "includes": [
+      ".csslintrc",
+      ".editorconfig",
+      ".eslintignore",
+      ".eslintrc",
+      ".gitattributes",
+      ".htaccess",
+      "index.php",
+      "robots.txt",
+      "update.php",
+      "web.config"
+    ],
+    "omit-defaults": true
   }
 }

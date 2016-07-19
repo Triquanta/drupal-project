@@ -1,0 +1,6 @@
+# Project editor configuration normalization
+# Note this applies only to non-docroot files. Drupal (in the docroot) uses its
+# own editorconfig.
+
+[*.{md,markdown}]
+trim_trailing_whitespace = false
