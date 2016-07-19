@@ -240,10 +240,10 @@ class ScriptHandler {
       $io->write("<warning>Review and update the trusted_host_patterns in settings.php later, to make sure your domain name will work.</warning>");
     }
     elseif ($result_exists) {
-      $io->write("Found existing sites.php file: <info>$result_path</info>.");
+      $io->write("Found existing settings file: <info>$result_path</info>.");
     }
     else {
-      $io->write("<error>Couldn't prepare sites.php.</error>.");
+      $io->write("<error>Couldn't prepare settings.</error>.");
     }
 
     // Prepare the database settings file.
