@@ -40,6 +40,37 @@ class ScriptHandler {
   }
 
   /**
+   * Cleanup Drupal after a composer install/update.
+   *
+   * These files shouldn't be publicaly accessible.
+   *
+   * @param \Composer\Script\Event $event
+   */
+  public static function cleanupDrupal(Event $event) {
+    $fs = new Filesystem();
+    $docroot = static::getDrupalRoot(getcwd());
+
+    $cleanup_files = [
+      'core/CHANGELOG.txt',
+      'core/COPYRIGHT.txt',
+      'core/INSTALL.mysql.txt',
+      'core/INSTALL.pgsql.txt',
+      'core/INSTALL.sqlite.txt',
+      'core/INSTALL.txt',
+      'core/LICENSE.txt',
+      'core/MAINTAINERS.txt',
+      'core/UPDATE.txt',
+    ];
+
+    foreach ($cleanup_files as $file) {
+      if ($fs->exists($docroot . '/' . $file)) {
+        $fs->remove($docroot . '/' . $file);
+      }
+    }
+
+  }
+
+  /**
    * Installs a fresh Drupal site.
    *
    * We asume that the database credentials can be read from the settings file.
@@ -183,33 +214,13 @@ class ScriptHandler {
       $docroot . '/'. 'modules',
       $docroot . '/'. 'profiles',
       $docroot . '/'. 'themes',
+      $docroot . '/'. 'libraries',
     ];
 
     foreach ($dirs as $dir) {
       if (!$fs->exists($dir)) {
         $fs->mkdir($dir);
         $fs->touch($dir . '/.gitkeep');
-      }
-    }
-
-    // Cleanup.
-    $cleanup_files = [
-      $docroot . '/sites/development.services.yml',
-      $docroot . '/sites/example.settings.local.php',
-      $docroot . '/core/CHANGELOG.txt',
-      $docroot . '/core/COPYRIGHT.txt',
-      $docroot . '/core/INSTALL.mysql.txt',
-      $docroot . '/core/INSTALL.pgsql.txt',
-      $docroot . '/core/INSTALL.sqlite.txt',
-      $docroot . '/core/INSTALL.txt',
-      $docroot . '/core/LICENSE.txt',
-      $docroot . '/core/MAINTAINERS.txt',
-      $docroot . '/core/UPDATE.txt',
-    ];
-
-    foreach ($cleanup_files as $file) {
-      if ($fs->exists($file)) {
-        $fs->remove($file);
       }
     }
 

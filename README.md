@@ -11,6 +11,7 @@ When installing the given `composer.json` some tasks are taken care of:
   instead of the one provided by Drupal (`docroot/vendor/autoload.php`).
 * Modules (packages of type `drupal-module`) will be placed in `docroot/modules/contrib/`
 * Theme (packages of type `drupal-theme`) will be placed in `docroot/themes/contrib/`
+* Javascript libraries (packages of type `drupal-library`) will be placed in `docroot/libraries/`
 * Profiles (packages of type `drupal-profile`) will be placed in `docroot/profiles/contrib/`
 * Creates a default writable version of `settings.php` suitable for a production environment.
 * Creates `docroot/sites/{{ site_name }}/files`-directory.
@@ -230,15 +231,76 @@ request is often a better solution), you can do so with the
 
 To add a patch to drupal module foobar insert the patches section in the extra 
 section of composer.json:
+
 ```json
 "extra": {
     "patches": {
         "drupal/foobar": {
-            "Patch description": "URL to patch"
+            "You own patch description": "URL to the patch file"
         }
     }
 }
 ```
+
+### How can I add Javascript libraries?
+
+Although composer is not meant for handling non-php packages, we can use it to
+manage external Javascript libraries. But note that it is a bit more elaborate
+to setup.
+
+This template can handle packages of the type `drupal-library` and will place
+the packages in `docroot/libraries`, because for most contrib modules this is
+one of the folders that will be searched. A sub-folder `contrib` is often not
+supported, so we also don't use it.
+
+To add a library you need to insert a new `package` definition under `reposities`
+in your composer.json file.
+
+```json
+"repositories": [
+  {
+    "type": "package",
+    "package": {
+      "name": "namespace/library_name",
+      "version": "x.x.x",
+      "type": "drupal-library",
+      "dist": {
+        "url": "URL to a zip file",
+        "type": "zip"
+      }
+    }
+  }
+]
+```
+Change: name, version, url and zip. It is advised to always download a tagged release.
+The name and version are arbitrary, but will be used in the `require` section.
+If you use a tagged release of a library, just also use that tag as version.
+
+If a zip file is not available and you need a library from source you can replace `dist`
+with `source`:
+
+```json
+"source": {
+  "url": "URL to a Git repository",
+  "type": "git",
+  "reference": "v4.3.0"
+}
+```
+
+The `reference` should be a branch, hash or tag.
+
+The above will tell composer where it can find the given package, now you can
+require the defined package by executing the command:
+
+```
+$ composer require "namespace/library_name:^x.x"
+```
+
+### How can I add a module that is not on Drupal.org?
+
+We can use the same strategy as for Javascript libraries, but for one changes:
+
+1. Rename type `drupal-library` to `drupal-module`
 
 ## Notes
 

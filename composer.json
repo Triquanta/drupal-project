@@ -75,6 +75,12 @@
     ],
     "pre-update-cmd": [
       "DrupalProject\\composer\\ScriptHandler::checkComposerVersion"
+    ],
+    "post-install-cmd": [
+      "DrupalProject\\composer\\ScriptHandler::cleanupDrupal"
+    ],
+    "post-update-cmd": [
+      "DrupalProject\\composer\\ScriptHandler::cleanupDrupal"
     ]
   },
   "extra": {
@@ -90,6 +96,9 @@
       ],
       "docroot/themes/contrib/{$name}": [
         "type:drupal-theme"
+      ],
+      "docroot/libraries/{$name}" : [
+        "type:drupal-library"
       ],
       "drush/contrib/{$name}": [
         "type:drupal-drush"
