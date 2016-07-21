@@ -56,6 +56,8 @@
  * implementations with custom ones.
  */
 
+global $config;
+
 /*
  * Database settings.
  * Loads the external settings.*.database.php from a path outside the Drupal root.
@@ -82,6 +84,20 @@ $settings['file_public_path'] = 'sites/{{ site_name }}/files';
  * Private files outside the docroot.
  */
 $settings['file_private_path'] = '../private_files/{{ site_name }}';
+
+/**
+ * Temporary files directory outside the docroot.
+ *
+ * Note: this is not visible from the UI.
+ */
+$config['system.file']['path']['temporary'] = '/tmp';
+
+/**
+ * Translation files outside the docroot.
+ *
+ * Note: this is not visible from the UI.
+ */
+$config['locale.settings']['translation']['path'] = '../translations';
 
 /**
  * Install profile.
