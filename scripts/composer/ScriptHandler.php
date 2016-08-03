@@ -285,7 +285,7 @@ class ScriptHandler {
 
     // Prepare the drush aliases file.
     $result_path = $project_root . '/drush/' . $site_name . '.aliases.drushrc.php';
-    $example_path = $project_root . '/drush/example_template.aliases.drushrc.php';
+    $example_path = $project_root . '/drush/aliases.drushrc.example_template.php';
     $result_exists = $fs->exists($result_path);
     if (!$result_exists && $fs->exists($example_path)) {
       $fs->copy($example_path, $result_path);
@@ -305,7 +305,7 @@ class ScriptHandler {
     // This step can be skipped by giving the argument --skip_drushrc.
     // This is useful for continuous integration and build servers.
     $result_path = $project_root . '/drush/drushrc.php';
-    $example_path = $project_root . '/drush/example_template.drushrc.php';
+    $example_path = $project_root . '/drush/drushrc.example_template.php';
     $result_exists = $fs->exists($result_path);
     if (!$result_exists && $fs->exists($example_path) && empty($args['skip_drushrc'])) {
       // Ask the domain name.
