@@ -11,6 +11,10 @@ docroot/profiles/contrib
 # Ignore Drupal's file directory
 web/sites/*/files
 
+# Ignore config
+config/devel.*
+config/system.menu.devel.yml
+
 # Ignore environment specific settings
 build.properties.local
 phpcs.xml
