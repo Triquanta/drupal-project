@@ -83,6 +83,16 @@ Note: if you want to install a clean Drupal site as well, use the `composer drup
 Note2: Drupal's multi-site setup is used, but the script doesn't work 100% for
 multiple sites. So review sites.php after adding another site.
 
+## Adding and installing new modules
+
+All modules available on drupal.org can be easily added via the following procedure. For modules and libraries not found on drupal.org see the FAQ below.
+
+1. From the repository root use the folling command:  
+   `$ composer require "drupal/module_name:^x.y"`  
+   Replace module_name with the modules system name. And replace x.y with the semantic version number you want (major.minor).
+2. Then go to the docroot and enable the module.  
+   `cd docroot; drush en module_name`
+
 ## Updating Drupal Core
 
 This project will attempt to keep all of your Drupal Core files up-to-date; the 
@@ -293,7 +303,7 @@ The above will tell composer where it can find the given package, now you can
 require the defined package by executing the command:
 
 ```
-$ composer require "namespace/library_name:^x.x"
+$ composer require "namespace/library_name:^x.y"
 ```
 
 ### How can I add a module that is not on Drupal.org?
