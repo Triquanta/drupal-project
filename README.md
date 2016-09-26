@@ -91,7 +91,8 @@ All modules available on drupal.org can be easily added via the following proced
    `$ composer require "drupal/module_name:^x.y"`  
    Replace module_name with the modules system name. And replace x.y with the semantic version number you want (major.minor).
 2. Then go to the docroot and enable the module.  
-   `cd docroot; drush en module_name`
+   `$ cd docroot; drush en module_name`
+3. Make sure you commit the changes to the composer.json and composer.lock files.
 
 ## Updating Drupal Core
 
