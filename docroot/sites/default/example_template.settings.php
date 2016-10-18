@@ -119,8 +119,8 @@ $settings['trusted_host_patterns'] = array(
   '^.+\.dev$',
   '^.+\.xip.io$',
   '^.+\.triquanta.nl$',
-  '^.+\.{{ site_name }}.nl$',
-  '^{{ site_name }}.nl$',
+  '^.+\.{{ site_name_uri }}.nl$',
+  '^{{ site_name_uri }}.nl$',
 );
 
 /**

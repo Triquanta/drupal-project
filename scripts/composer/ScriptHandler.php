@@ -166,7 +166,7 @@ class ScriptHandler {
     if (empty($site_name)) {
       // Highlight the default selection.
       $sites_directories_options = $sites_directories;
-      $sites_directories_options[0] = '<question>' . $sites_directories[0] . ' (Default, press enter to continue) </question>';
+      $sites_directories_options[0] = '<question>' . $sites_directories[0] . ' (Press enter to continue) </question>';
 
       $site_name_key = $io->select('Select the site to install or update: ',  $sites_directories_options, 0);
 
@@ -182,6 +182,10 @@ class ScriptHandler {
 
     // Add site name result to replaces map.
     $replaces += ['{{ site_name }}' => $site_name];
+
+    // Add site name which can be used for uri's (replace dash for underscore).
+    $site_name_uri = str_replace('_', '-', $site_name);
+    $replaces += ['{{ site_name_uri }}' => $site_name_uri];
 
     $environments = $environment_options = ['prod', 'acc', 'test', 'dev'];
 
@@ -313,7 +317,7 @@ class ScriptHandler {
     $result_exists = $fs->exists($result_path);
     if (!$result_exists && $fs->exists($example_path) && empty($args['skip_drushrc'])) {
       // Ask the domain name.
-      $domain_name = $io->askAndValidate('Enter the domain name for the site on this environment, press <enter> to use: http://' . $site_name . '.localhost: ', 'DrupalProject\composer\ScriptHandler::validateDomainName', NULL, 'http://' . $site_name . '.localhost');
+      $domain_name = $io->askAndValidate('Enter the domain name for the site on this environment, press <enter> to use: http://' . $site_name_uri . '.localhost: ', 'DrupalProject\composer\ScriptHandler::validateDomainName', NULL, 'http://' . $site_name_uri . '.localhost');
       // Add domain name result to replaces map.
       $replaces += ['{{ domain_name }}' => $domain_name];
       $fs->copy($example_path, $result_path);

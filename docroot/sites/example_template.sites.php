@@ -54,21 +54,21 @@
  * @see https://www.drupal.org/documentation/install/multi-site
  */
 
-$sites['{{ site_name }}.dev'] =                '{{ site_name }}';
-$sites['{{ site_name }}.local'] =              '{{ site_name }}';
-$sites['{{ site_name }}.localhost'] =          '{{ site_name }}';
+$sites['{{ site_name_uri }}.dev'] =                '{{ site_name }}';
+$sites['{{ site_name_uri }}.local'] =              '{{ site_name }}';
+$sites['{{ site_name_uri }}.localhost'] =          '{{ site_name }}';
 $sites['xip.io'] =                             '{{ site_name }}';
 
 // Testing.
-$sites['{{ site_name }}-test.triquanta.nl'] =  '{{ site_name }}';
-$sites['test.{{ site_name }}.nl'] =            '{{ site_name }}';
+$sites['{{ site_name_uri }}-test.triquanta.nl'] =  '{{ site_name }}';
+$sites['test.{{ site_name_uri }}.nl'] =            '{{ site_name }}';
 
 // Staging.
-$sites['{{ site_name }}-acc.triquanta.nl'] =   '{{ site_name }}';
-$sites['acc.{{ site_name }}.nl'] =             '{{ site_name }}';
+$sites['{{ site_name_uri }}-acc.triquanta.nl'] =   '{{ site_name }}';
+$sites['acc.{{ site_name_uri }}.nl'] =             '{{ site_name }}';
 
 // Production.
-$sites['{{ site_name }}-prod.triquanta.nl'] =  '{{ site_name }}';
-$sites['beta.{{ site_name }}.nl'] =            '{{ site_name }}';
-$sites['www.{{ site_name }}.nl'] =             '{{ site_name }}';
-$sites['{{ site_name }}.nl'] =                 '{{ site_name }}';
+$sites['{{ site_name_uri }}-prod.triquanta.nl'] =  '{{ site_name }}';
+$sites['beta.{{ site_name_uri }}.nl'] =            '{{ site_name }}';
+$sites['www.{{ site_name_uri }}.nl'] =             '{{ site_name }}';
+$sites['{{ site_name_uri }}.nl'] =                 '{{ site_name }}';

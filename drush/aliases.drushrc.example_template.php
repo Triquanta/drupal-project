@@ -4,8 +4,8 @@ $structure_tables_list = 'cache,cache_apachesolr,cache_block,cache_bootstrap,cac
 
 $aliases['test'] = array(
   'root' => '/var/www/{{ site_name }}/docroot',
-  'uri' => 'http://{{ site_name }}-test.triquanta.nl',
-  'remote-host' => '{{ site_name }}-test.triquanta.nl',
+  'uri' => 'http://{{ site_name_uri }}-test.triquanta.nl',
+  'remote-host' => '{{ site_name_uri }}-test.triquanta.nl',
   'remote-user' => 'deploy',
   //'ssh-options' => '-o "ProxyCommand ssh admin@79.170.90.48 nc %h %p 2> /dev/null"',
   'command-specific' => array (
@@ -20,8 +20,8 @@ $aliases['test'] = array(
 
 $aliases['acc'] = array(
   'root' => '/var/www/{{ site_name }}/docroot',
-  'uri' => 'http://{{ site_name }}-acc.triquanta.nl',
-  'remote-host' => '{{ site_name }}-acc.triquanta.nl',
+  'uri' => 'http://{{ site_name_uri }}-acc.triquanta.nl',
+  'remote-host' => '{{ site_name_uri }}-acc.triquanta.nl',
   'remote-user' => 'deploy',
   //'ssh-options' => '-o "ProxyCommand ssh admin@79.170.90.48 nc %h %p 2> /dev/null"',
   'command-specific' => array (
@@ -36,8 +36,8 @@ $aliases['acc'] = array(
 
 $aliases['prod'] = array(
   'root' => '/var/www/{{ site_name }}/docroot',
-  'uri' => 'https://{{ site_name }}-prod.triquanta.nl',
-  'remote-host' => '{{ site_name }}-prod.triquanta.nl',
+  'uri' => 'https://{{ site_name_uri }}-prod.triquanta.nl',
+  'remote-host' => '{{ site_name_uri }}-prod.triquanta.nl',
   'remote-user' => 'deploy',
   //'ssh-options' => '-o "ProxyCommand ssh admin@79.170.90.48 nc %h %p 2> /dev/null"',
   'command-specific' => array (
