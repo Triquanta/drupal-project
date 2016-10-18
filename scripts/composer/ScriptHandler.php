@@ -84,13 +84,15 @@ class ScriptHandler {
     // First prepare our file structure.
     static::prepareDrupal($event);
 
-    $account_name = $io->askAndValidate('Enter the administrator name (Default: gebruikereen): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, 'gebruikereen');
-    $account_pass = $io->ask('Enter the administrator password (Default: 123456): ', '123456');
-    $account_mail = $io->askAndValidate('Enter the administrator mail (Default: beheer@triquanta.nl): ', 'DrupalProject\composer\ScriptHandler::validateMail', NULL, 'beheer@triquanta.nl');
-    $site_name = $io->askAndValidate('Enter the site name: ', 'DrupalProject\composer\ScriptHandler::validateGenericName');
-    $site_mail = $io->askAndValidate('Enter the site mail (Default: beheer@triquanta.nl): ', 'DrupalProject\composer\ScriptHandler::validateMail', NULL, 'beheer@triquanta.nl');
+    $account_name = $io->askAndValidate('Choose and enter an administrator user name (Default: gebruikereen): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, 'gebruikereen');
+    $account_pass = $io->ask('Choose and enter the administrators password (Default: 123456): ', '123456');
+    $account_mail = $io->askAndValidate('Enter the administrator users mail (Default: beheer@triquanta.nl): ', 'DrupalProject\composer\ScriptHandler::validateMail', NULL, 'beheer@triquanta.nl');
+    $site_hrn = addslashes($io->ask('Choose and enter a human readable site name: '));
+    $site_mail = $io->askAndValidate('Enter the sitewide mail (Default: beheer@triquanta.nl): ', 'DrupalProject\composer\ScriptHandler::validateMail', NULL, 'beheer@triquanta.nl');
 
-    exec("vendor/drush/drush/drush --account-mail=$account_mail --account-name='$account_name' --account-pass='$account_pass' --site-mail=$site_mail --site-name='$site_name' --root='$docroot' --yes site-install standard install_configure_form.update_status_module='array\(FALSE,FALSE\)'", $output);
+    // Execute Drush site install.
+    // Prepend $site_name with a $ to allow for single quotes in the name.
+    exec("vendor/drush/drush/drush --account-mail=$account_mail --account-name='$account_name' --account-pass='$account_pass' --site-mail=$site_mail --site-name=$'$site_hrn' --root='$docroot' --yes site-install standard install_configure_form.update_status_module='array\(FALSE,FALSE\)'", $output);
 
   }
 
@@ -169,7 +171,7 @@ class ScriptHandler {
       // If new is selected, ask for a new site name.
       $install_new = array_search($add_new_site_option, $sites_directories);
       if ($site_name_key == $install_new) {
-        $site_name = $io->askAndValidate('Enter the site name: ', 'DrupalProject\composer\ScriptHandler::validateGenericName');
+        $site_name = $io->askAndValidate('Choose a system site name (short): ', 'DrupalProject\composer\ScriptHandler::validateGenericName');
       }
       else {
         $site_name = $sites_directories[$site_name_key];
