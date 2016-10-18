@@ -90,6 +90,8 @@ class ScriptHandler {
     $site_hrn = addslashes($io->ask('Choose and enter a human readable site name: '));
     $site_mail = $io->askAndValidate('Enter the sitewide mail (Default: beheer@triquanta.nl): ', 'DrupalProject\composer\ScriptHandler::validateMail', NULL, 'beheer@triquanta.nl');
 
+    $io->write('Your Drupal site is being installed, please wait ...');
+
     // Execute Drush site install.
     // Prepend $site_name with a $ to allow for single quotes in the name.
     exec("vendor/drush/drush/drush --account-mail=$account_mail --account-name='$account_name' --account-pass='$account_pass' --site-mail=$site_mail --site-name=$'$site_hrn' --root='$docroot' --yes site-install standard install_configure_form.update_status_module='array\(FALSE,FALSE\)'", $output);
