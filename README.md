@@ -33,7 +33,7 @@ First you need to [install composer](https://getcomposer.org/doc/00-intro.md#ins
 You might need to replace `composer` with `php composer.phar` (or similar) 
 for your setup.
 
-After that you can install all vendor packages (this includes Drupal Core and Contrib). 
+After that you can install all vendor packages (this includes Drupal Core and Contrib modules). 
 
 ```
 git clone https://github.com/Triquanta/drupal-project.git <project_name>
@@ -41,57 +41,63 @@ cd <project_name>
 composer install
 ```
 
-Note: with `composer require ...` you can download new dependencies to your 
-installation.
-
-```
-composer require drupal/diff:8.*
-```
-
 ## Install a website
 
-A fresh standard Drupal site can be installed by executing:
+First make sure you already have a working local empty MySql database prepared.
+
+Then a fresh standard Drupal site can then be installed by executing:
 
 ```
-$ composer drupal-install
+composer drupal-install
 ```
 
-First the file structure will be prepared, some site specific questions will be asked (if necessary).
+First the project file structure and configuration files will be prepared according to the environment type you choose (dev, test, acc, prod).
+The wizard will ask your input, but will skip parts of the setup that are detected to be completed earlier (generated files are already present).
 
-Note: make sure you already have a working database, setup with credentials as
-given during `composer update/install`.
-
-Database settings will be read from file and account credentials can be chosen.
-
-If you chose a `dev` environment the following tasks will also be performed:
-
-1. @todo Enable development modules.
-1. @todo Create a demo user for each user role.
+**Note**: Database credentials will be asked during setup, if you have non standard database settings manually prepare a `settings.SITE_NAME.database.php` file in the `settings` folder.  
+**Note 2**: Also read `Prepare a site specific codebase` below, for more info.
 
 ## Prepare a site specific codebase
 
-You can prepare the Drupal site file structure with the following command:   
+This step is also performed during a `composer drupal-install`, so can be skipped if you have used, or will use, that command.
+
+To only prepare the Drupal project file structure and configuration files (and not install a fresh site), use the following command:   
 
 ```
-$ composer drupal-prepare
+composer drupal-prepare
 ```
 
 This will do the part of the magic mentioned in `What does the template do`, which is not covered by a plain `composer install`.
 
-Note: if you want to install a clean Drupal site as well, use the `composer drupal-install` command instead.
+**Note**: if you want to install a clean Drupal site as well, use the `composer drupal-install` command instead.  
+**Note 2**: Drupal's multi-site setup is used, even for a single site, the script doesn't work for additional sites on the same code base, you will have to configure them manually after preparing the first automatically.
 
-Note2: Drupal's multi-site setup is used, but the script doesn't work 100% for
-multiple sites. So review sites.php after adding another site.
+@todo Explanation per environment type.
+
+### Development environment
+
+If you choose `dev` as environment during `composer drupal-install` or `composer drupal-prepare`, the following tasks will be performed:
+
+1. Enable the services in `services.dev.yml`.
+1. Show all error messages with backtrace information.
+1. Disable CSS and JS aggregation.
+1. Disable the render cache.
+1. Allow test modules and themes to be installed.
+1. Enable access to `rebuild.php`.
+1. @todo Configure Behat.
+1. @todo Configure PHP CodeSniffer.
+1. @todo Enable development modules.
+1. @todoCreate a demo user for each user role.
 
 ## Adding and installing new modules
 
 All modules available on drupal.org can be easily added via the following procedure. For modules and libraries not found on drupal.org see the FAQ below.
 
 1. From the repository root use the folling command:  
-   `$ composer require "drupal/module_name:^x.y"`  
+   `composer require "drupal/module_name:^x.y"`  
    Replace module_name with the modules system name. And replace x.y with the semantic version number you want (major.minor).
 2. Then go to the docroot and enable the module.  
-   `$ cd docroot; drush en module_name`
+   `cd docroot; drush en module_name`
 3. Make sure you commit the changes to the composer.json and composer.lock files.
 
 ## Updating Drupal Core
@@ -118,22 +124,6 @@ Follow the steps below to update your core files.
    keeping all of your modifications at the beginning or end of the file is a 
    good strategy to keep merges easy.
 
-## Set up tools for the development environment
-
-If you chose `dev` as environment during `composer install/update`
-
-This will perform the following tasks:
-
-1. @todo Configure Behat.
-1. @todo Configure PHP CodeSniffer.
-1. Enable 'development mode'. This will:
-  * Enable the services in `services.dev.yml`.
-  * Show all error messages with backtrace information.
-  * Disable CSS and JS aggregation.
-  * Disable the render cache.
-  * Allow test modules and themes to be installed.
-  * Enable access to `rebuild.php`.
-
 ## Importing configuration in a freshly installed site
 
 If you want to import config, but you did a fresh install you'll have to execute the following steps first.
@@ -141,16 +131,16 @@ If you want to import config, but you did a fresh install you'll have to execute
 1. Copy the the `uuid` value from `config/system.site.yml`.
 1. Execute the following commands, replace `<uuid>` for the copied version.
     ```
-    $ cd docroot
-    $ drush config-set system.site uuid <uuid>
+    cd docroot
+    drush config-set system.site uuid <uuid>
     ```
 1. Remove the shortcut entities which where created during the clean install.
     ```
-    $ drush php-eval '\Drupal::entityManager()->getStorage("shortcut_set")->load("default")->delete();'
+    drush php-eval '\Drupal::entityManager()->getStorage("shortcut_set")->load("default")->delete();'
     ```
 1. Then finally you can do:
     ```
-    $ drush config-import
+    drush config-import
     ```
 
 ## Running Behat tests
@@ -159,16 +149,16 @@ The Behat test suite is located in the `tests/` folder. The easiest way to run
 them is by going into this folder and executing the following command:
 
 ```
-$ cd tests/
-$ ./behat
+cd tests/
+./behat
 ```
 
 If you want to execute a single test, just provide the path to the test as an
 argument. The tests are located in `tests/features/`:
 
 ```
-$ cd tests/
-$ ./behat features/authentication.feature
+cd tests/
+./behat features/authentication.feature
 ```
 
 If you want to run the tests from a different folder, then provide the path to
@@ -176,7 +166,7 @@ If you want to run the tests from a different folder, then provide the path to
 
 ```
 # Run the tests from the root folder of the project.
-$ ./vendor/bin/behat -c tests/behat.yml
+./vendor/bin/behat -c tests/behat.yml
 ```
 
 
@@ -195,7 +185,7 @@ In the default configuration it will scan all files in the following folders:
 First you'll need to setup a `dev` environment using `composer install/update` or by running:
  
  ```
- $ composer run-script post-install-cmd
+ composer run-script post-install-cmd
  ```
 
 This will generate a `phpcs.xml` file containing settings specific to your local
@@ -209,10 +199,10 @@ The coding standards checks can then be run as follows:
 
 ```
 # Scan all files for coding standards violations.
-$ ./vendor/bin/phpcs
+./vendor/bin/phpcs
 
 # Scan only a single folder.
-$ ./vendor/bin/phpcs docroot/modules/custom/mymodule
+./vendor/bin/phpcs docroot/modules/custom/mymodule
 ```
 
 #### Run checks automatically when pushing
@@ -304,7 +294,7 @@ The above will tell composer where it can find the given package, now you can
 require the defined package by executing the command:
 
 ```
-$ composer require "namespace/library_name:^x.y"
+composer require "namespace/library_name:^x.y"
 ```
 
 ### How can I add a module that is not on Drupal.org?
