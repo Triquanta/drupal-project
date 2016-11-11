@@ -108,6 +108,9 @@ class ScriptHandler {
     // Prepend $site_name with a $ to allow for single quotes in the name.
     exec("vendor/drush/drush/drush --account-mail=$account_mail --account-name='$account_name' --account-pass='$account_pass' --site-mail=$site_mail --site-name=$'$site_hrn' --root='$docroot' --yes site-install $profiles[$profile_key] install_configure_form.update_status_module='array\(FALSE,FALSE\)'", $output);
 
+    $io->write('Your new Drupal site will now open in your browser using a one time login link.');
+
+    exec("vendor/drush/drush/drush uli --root='$docroot'");
   }
 
   /**
