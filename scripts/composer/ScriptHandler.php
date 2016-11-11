@@ -369,6 +369,7 @@ class ScriptHandler {
       $result_exists = $fs->exists($result_path);
       if (!$result_exists && $fs->exists($example_path)) {
         $fs->copy($example_path, $result_path);
+        static::fileSearchReplace($result_path, $replaces);
         $fs->chmod($result_path, 0640);
         $io->write("Created a $result_path file with chmod 0640.");
       }
@@ -381,6 +382,7 @@ class ScriptHandler {
       $result_exists = $fs->exists($result_path);
       if ($environment_name == 'dev' && !$result_exists && $fs->exists($example_path)) {
         $fs->copy($example_path, $result_path);
+        static::fileSearchReplace($result_path, $replaces);
         $fs->chmod($result_path, 0640);
         $io->write("Created a $result_path file with chmod 0640.");
       }
