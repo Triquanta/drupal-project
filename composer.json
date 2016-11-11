@@ -6,7 +6,11 @@
   "authors": [
     {
       "name": "dmsmidt",
-      "role": ""
+      "role": "developer"
+    },
+    {
+      "name": "marcvangend",
+      "role": "developer"
     }
   ],
   "repositories": [
