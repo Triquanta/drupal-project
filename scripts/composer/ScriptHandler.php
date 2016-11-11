@@ -47,6 +47,7 @@ class ScriptHandler {
    * @param \Composer\Script\Event $event
    */
   public static function cleanupDrupal(Event $event) {
+    $io = $event->getIO();
     $fs = new Filesystem();
     $docroot = static::getDrupalRoot(getcwd());
 
@@ -69,6 +70,13 @@ class ScriptHandler {
       }
     }
 
+    // Disconnect from the Triquanta/drupal-project repository.
+    if ($fs->exists('.git') && exec("git remote get-url origin") === 'git@github.com:Triquanta/drupal-project.git') {
+      $remove_git = $io->askConfirmation('Disconnect from the github.com:Triquanta/drupal-project repository? [Y/n]');
+      if ($remove_git) {
+        $fs->remove('.git');
+      }
+    }
   }
 
   /**

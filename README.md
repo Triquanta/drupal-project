@@ -43,11 +43,15 @@ composer install
 
 Note, this will by default also install all development dependencies. To skip development dependencies append `--no-dev` to the `composer install` command.
 
-Now change your remote origin to that of your new project.
- 
+After first install, composer will clean up unnecessary Drupal file (eg. CHANTELOG.txt).
+
+Answer `Y` when asked to delete the .git directory, which will effectively disconnect your project from its Triquanta/drupal-project origin. Next, initialize a new git repository for this specific project:
 ```
-git remote set-url origin <project_repository> 
+git init
+git add .
+git commit -m "Initial commit based on github.com/Triquanta/drupal-project"
 ```
+Now you can do whatever is appropriate for your git work flow, like initialize git flow (`git flow init`), link your new git repo to a new remote origin (`git remote add ...`), and pushing to origin.
 
 ## Install a website
 
