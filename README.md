@@ -41,6 +41,12 @@ cd <project_name>
 composer install
 ```
 
+Now change your remote origin to that of your new project.
+ 
+```
+git remote set-url origin <project_repository> 
+```
+
 ## Install a website
 
 First make sure you already have a working local empty MySql database prepared.
@@ -87,7 +93,7 @@ If you choose `dev` as environment during `composer drupal-install` or `composer
 1. @todo Configure Behat.
 1. @todo Configure PHP CodeSniffer.
 1. @todo Enable development modules.
-1. @todoCreate a demo user for each user role.
+1. @todo Create a demo user for each user role.
 
 ## Adding and installing new modules
 
