@@ -138,6 +138,7 @@ class ScriptHandler {
     $fs = new Filesystem();
     $project_root = getcwd();
     $docroot = static::getDrupalRoot($project_root);
+    $permissions_changed = FALSE;
 
     // Process arguments. (Need to be entered in the form --arg=value or --arg).
     // @todo load args from build file also.
@@ -242,6 +243,7 @@ class ScriptHandler {
 
     // Required directories (for unit testing).
     $dirs = [
+      'config',
       'private_files/' . $site_name,
       $docroot . '/'. 'modules',
       $docroot . '/'. 'profiles',
@@ -252,6 +254,7 @@ class ScriptHandler {
     foreach ($dirs as $dir) {
       if (!$fs->exists($dir)) {
         $fs->mkdir($dir);
+        $permissions_changed = TRUE;
         $fs->touch($dir . '/.gitkeep');
       }
     }
@@ -264,7 +267,8 @@ class ScriptHandler {
       $fs->copy($example_path, $result_path);
       static::fileSearchReplace($result_path, $replaces);
       $fs->chmod($result_path, 0640);
-      $io->write("Created a $result_path file with chmod 0640.");
+      $permissions_changed = TRUE;
+      $io->write("Created a $result_path file with mode 0640.");
       $io->write("<warning>Review and update sites.php later, to make sure all domain names will work.</warning>");
     }
     elseif ($result_exists) {
@@ -279,7 +283,8 @@ class ScriptHandler {
       $fs->copy($example_path, $result_path);
       static::fileSearchReplace($result_path, $replaces);
       $fs->chmod($result_path, 0640);
-      $io->write("Created a $result_path file with chmod 0640.");
+      $permissions_changed = TRUE;
+      $io->write("Created a $result_path file with mode 0640.");
       $io->write("<warning>Review and update the trusted_host_patterns in settings.php later, to make sure your domain name will work.</warning>");
     }
     elseif ($result_exists) {
@@ -303,7 +308,8 @@ class ScriptHandler {
       $fs->copy($example_path, $result_path);
       static::fileSearchReplace($result_path, $replaces);
       $fs->chmod($result_path, 0640);
-      $io->write("Created a $result_path file with chmod 0640.");
+      $permissions_changed = TRUE;
+      $io->write("Created a $result_path file with mode 0640.");
     }
     elseif (!empty($args['skip_db'])) {
       $io->write("<info>Skipping database settings file setup.</info>.");
@@ -323,7 +329,8 @@ class ScriptHandler {
       $fs->copy($example_path, $result_path);
       static::fileSearchReplace($result_path, $replaces);
       $fs->chmod($result_path, 0640);
-      $io->write("Created a $result_path file with chmod 0640.");
+      $permissions_changed = TRUE;
+      $io->write("Created a $result_path file with mode 0640.");
       $io->write("<warning>Review and update the aliases file, to make sure all aliases will work.</warning>");
     }
     elseif ($result_exists) {
@@ -348,7 +355,8 @@ class ScriptHandler {
       // Replace the domain name placeholders.
       static::fileSearchReplace($result_path, $replaces);
       $fs->chmod($result_path, 0640);
-      $io->write("Created a $result_path file with chmod 0640.");
+      $permissions_changed = TRUE;
+      $io->write("Created a $result_path file with mode 0640.");
     }
     // A drushrc.php is already present.
     elseif ($result_exists) {
@@ -379,7 +387,8 @@ class ScriptHandler {
         $fs->copy($example_path, $result_path);
         static::fileSearchReplace($result_path, $replaces);
         $fs->chmod($result_path, 0640);
-        $io->write("Created a $result_path file with chmod 0640.");
+        $permissions_changed = TRUE;
+        $io->write("Created a $result_path file with mode 0640.");
       }
       elseif ($result_exists) {
         $io->write("Found existing environment specific settings file: <info>$result_path</info>.");
@@ -392,7 +401,8 @@ class ScriptHandler {
         $fs->copy($example_path, $result_path);
         static::fileSearchReplace($result_path, $replaces);
         $fs->chmod($result_path, 0640);
-        $io->write("Created a $result_path file with chmod 0640.");
+        $permissions_changed = TRUE;
+        $io->write("Created a $result_path file with mode 0640.");
       }
       elseif ($result_exists) {
         $io->write("Found existing services file: <info>$result_path</info>.");
@@ -402,17 +412,32 @@ class ScriptHandler {
       $io->write("<info>No environment specific settings and services needed (default is production).</info>");
     }
 
-    // Create the files directory with chmod 0755
+    // Create the files directory with mode 0775.
     $result_path = $docroot . '/sites/' . $site_name . '/files';
     if (!$fs->exists($result_path)) {
       $oldmask = umask(0);
-      $fs->mkdir($result_path, 0755);
+      $fs->mkdir($result_path, 0775);
+      $permissions_changed = TRUE;
       umask($oldmask);
-      $io->write("Create a $result_path directory with chmod 0755");
+      $io->write("Created a $result_path directory with mode 0775");
+    }
+
+
+    // Check if the config dir is writable; minimum permissions are 0775.
+    // See http://php.net/manual/en/function.fileperms.php for info about the
+    // decimal->octal conversion.
+    $config_dir = 'config';
+    if ($fs->exists($config_dir) && decoct(fileperms($config_dir) & 0777) < 775) {
+      $fs->chmod($config_dir, 0775);
+      $permissions_changed = TRUE;
+      $io->write("Made the config directory writable with mode 0775");
+    }
+
+    if ($permissions_changed) {
+      $io->write("<warning>File permissions should be correct now. Please make sure that all files / directories belong to the same group as your webserver user.</warning>");
     }
 
     $io->write("<info>Preparation logic done.</info>");
-
   }
 
   public static function validateGenericName($input) {
