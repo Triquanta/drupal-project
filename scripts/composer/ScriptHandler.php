@@ -71,10 +71,13 @@ class ScriptHandler {
     }
 
     // Disconnect from the Triquanta/drupal-project repository.
-    if ($fs->exists('.git') && exec("git remote get-url origin") === 'git@github.com:Triquanta/drupal-project.git') {
-      $remove_git = $io->askConfirmation('Disconnect from the github.com:Triquanta/drupal-project repository? [Y/n]');
-      if ($remove_git) {
-        $fs->remove('.git');
+    if ($fs->exists('.git')) {
+      $git_origin_url = exec("git remote get-url origin");
+      if ($git_origin_url === 'https://github.com/Triquanta/drupal-project.git' || $git_origin_url === 'git@github.com:Triquanta/drupal-project.git') {
+        $remove_git = $io->askConfirmation('Disconnect from the github.com/Triquanta/drupal-project repository? [Y/n]');
+        if ($remove_git) {
+          $fs->remove('.git');
+        }
       }
     }
   }
