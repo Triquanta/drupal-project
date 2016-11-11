@@ -1,6 +1,7 @@
 {
   "name": "triquanta/drupal-project",
   "description": "Triquanta project template for Drupal 8 projects with Composer and Behat",
+  "version": "1.0.0-beta.1",
   "type": "project",
   "license": "GPL-2.0+",
   "authors": [
