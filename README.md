@@ -41,6 +41,8 @@ cd <project_name>
 composer install
 ```
 
+Note, this will by default also install all development dependencies. To skip development dependencies append `--no-dev` to the `composer install` command.
+
 Now change your remote origin to that of your new project.
  
 ```
