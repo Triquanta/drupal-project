@@ -60,6 +60,7 @@ class ScriptHandler {
       'core/LICENSE.txt',
       'core/MAINTAINERS.txt',
       'core/UPDATE.txt',
+      'sites/development.services.yml',
     ];
 
     foreach ($cleanup_files as $file) {
