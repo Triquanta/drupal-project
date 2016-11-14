@@ -1,7 +1,7 @@
 {
   "name": "triquanta/drupal-project",
   "description": "Triquanta project template for Drupal 8 projects with Composer and Behat",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "type": "project",
   "license": "GPL-2.0+",
   "authors": [
@@ -82,7 +82,8 @@
       "DrupalProject\\composer\\ScriptHandler::checkComposerVersion"
     ],
     "post-install-cmd": [
-      "DrupalProject\\composer\\ScriptHandler::cleanupDrupal"
+      "DrupalProject\\composer\\ScriptHandler::cleanupDrupal",
+      "DrupalProject\\composer\\ScriptHandler::excludeDevDependencies"
     ],
     "post-update-cmd": [
       "DrupalProject\\composer\\ScriptHandler::cleanupDrupal"

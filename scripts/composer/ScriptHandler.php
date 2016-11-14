@@ -381,6 +381,9 @@ class ScriptHandler {
       $io->write("<error>Couldn't prepare database settings file.</error>.");
     }
 
+    // Remind the user to register dev-dependency modules in drushrc.
+    static::excludeDevDependencies($event);
+
     // Prepare the environment specific settings and services files.
     if ($environment_name != 'prod') {
       $result_path = $docroot . '/sites/' . $site_name . '/settings.' . $environment_name . '.php';
@@ -441,6 +444,31 @@ class ScriptHandler {
     }
 
     $io->write("<info>Preparation logic done.</info>");
+  }
+
+  public static function excludeDevDependencies(Event $event) {
+    $io = $event->getIO();
+    $drush_skip_modules = [];
+    // Loop over the dev requirements for this project.
+    foreach ($event->getComposer()->getPackage()->getDevRequires() as $key => $info) {
+      // Retrieve the package metadata for the package.
+      $package = $event->getComposer()->getRepositoryManager()->findPackage($info->getTarget(), $info->getConstraint());
+      // Check if this is a drupal-module.
+      if ($package->getType() === 'drupal-module') {
+        $drush_skip_modules[] = $key;
+      }
+    }
+    if (!empty($drush_skip_modules)) {
+      // Notify the user that they need to add all modules contained in the
+      // package to the skip-modules option in drushrc.php.
+      // @todo: It would be nice to automate this, but there are 2 difficulties:
+      //   - package name is not always equal to module name, and a package can contain multiple modules (use drush to retrieve module names?);
+      //   - if we automatically generate $options['skip-modules'], we need to provide a way to add custom additions and not override them on every composer install.
+      $io->write([
+        "<warning>The following dev-dependencies contain Drupal modules. Make sure to add them to the \$options['skip-modules'] variable in drushrc.php.</warning>",
+        "<warning>" . implode(', ', $drush_skip_modules) . "</warning>",
+      ]);
+    }
   }
 
   public static function validateGenericName($input) {
