@@ -57,4 +57,4 @@ parameters:
   #
   # Not recommended in production environments
   # @default false
-  http.response.debug_cacheability_headers: false
+  http.response.debug_cacheability_headers: true
