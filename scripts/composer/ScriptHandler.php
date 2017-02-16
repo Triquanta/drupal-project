@@ -307,7 +307,7 @@ class ScriptHandler {
       $replaces += ['{{ db_name }}' => $io->askAndValidate('Enter the database name (Default: ' . $site_name . '): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, $site_name)];
       $replaces += ['{{ db_user }}' => $io->askAndValidate('Enter the database user: ', 'DrupalProject\composer\ScriptHandler::validateGenericName')];
       $replaces += ['{{ db_password }}' => $io->askAndHideAnswer('Enter the database password (hidden): ')];
-      $replaces += ['{{ hash_salt }}' => Crypt::hashBase64($site_name + date('dDjzWL T', time()) + $replaces['{{ db_password }}'])];
+      $replaces += ['{{ hash_salt }}' => Crypt::hashBase64($site_name . date('dDjzWL T', time()) . $replaces['{{ db_password }}'])];
       $fs->copy($example_path, $result_path);
       static::fileSearchReplace($result_path, $replaces);
       $fs->chmod($result_path, 0640);
