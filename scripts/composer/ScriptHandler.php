@@ -7,6 +7,7 @@
 
 namespace DrupalProject\composer;
 
+use Composer\IO\IOInterface;
 use Composer\Script\Event;
 use Composer\Semver\Comparator;
 use Drupal\Component\Utility\Crypt;
@@ -72,12 +73,17 @@ class ScriptHandler {
 
     // Disconnect from the Triquanta/drupal-project repository.
     if ($fs->exists('.git')) {
-      $git_origin_url = exec("git remote get-url origin");
-      if ($git_origin_url === 'https://github.com/Triquanta/drupal-project.git' || $git_origin_url === 'git@github.com:Triquanta/drupal-project.git') {
-        $remove_git = $io->askConfirmation('Disconnect from the github.com/Triquanta/drupal-project repository? [Y/n]');
-        if ($remove_git) {
-          $fs->remove('.git');
+      try {
+        $git_origin_url = exec("git remote get-url origin");
+        if ($git_origin_url === 'https://github.com/Triquanta/drupal-project.git' || $git_origin_url === 'git@github.com:Triquanta/drupal-project.git') {
+          $remove_git = $io->askConfirmation('Disconnect from the github.com/Triquanta/drupal-project repository? [Y/n]');
+          if ($remove_git) {
+            $fs->remove('.git');
+          }
         }
+      }
+      catch(\Exception $e) {
+        $io->write('Skipped git repo check.', TRUE, IOInterface::VERBOSE);
       }
     }
   }
@@ -211,7 +217,7 @@ class ScriptHandler {
     // Add site name result to replaces map.
     $replaces += ['{{ site_name }}' => $site_name];
 
-    // Add site name which can be used for uri's (replace dash for underscore).
+    // Add site name which can be used for uri's (replace underscores with dashes).
     $site_name_uri = str_replace('_', '-', $site_name);
     $replaces += ['{{ site_name_uri }}' => $site_name_uri];
 
