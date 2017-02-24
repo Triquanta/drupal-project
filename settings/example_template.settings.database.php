@@ -10,11 +10,11 @@ $databases['default']['default'] = array (
   'database' => '{{ db_name }}',
   'username' => '{{ db_user }}',
   'password' => '{{ db_password }}',
-  'prefix' => '',
-  'host' => '127.0.0.1',
-  'port' => '3306',
+  'prefix' => '{{ db_prefix }}',
+  'host' => '{{ db_host }}',
+  'port' => '{{ db_port }}',
   'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
-  'driver' => 'mysql',
+  'driver' => '{{ db_driver }}',
 );
 
 /**

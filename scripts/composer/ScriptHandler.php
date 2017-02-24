@@ -304,10 +304,71 @@ class ScriptHandler {
     $example_path = $project_root . '/settings/example_template.settings.database.php';
     $result_exists = $fs->exists($result_path);
     if (!$result_exists && $fs->exists($example_path) && empty($args['skip_db'])) {
-      $replaces += ['{{ db_name }}' => $io->askAndValidate('Enter the database name (Default: ' . $site_name . '): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, $site_name)];
-      $replaces += ['{{ db_user }}' => $io->askAndValidate('Enter the database user: ', 'DrupalProject\composer\ScriptHandler::validateGenericName')];
-      $replaces += ['{{ db_password }}' => $io->askAndHideAnswer('Enter the database password (hidden): ')];
-      $replaces += ['{{ hash_salt }}' => Crypt::hashBase64($site_name . date('dDjzWL T', time()) . $replaces['{{ db_password }}'])];
+      // Check if we have an argument with the database info set.
+      // Database info format: 'mysql://[db_user]:[db_pass]@[host]]:[port]/[db_name]'
+      // Note: prefix is not supported, although you can use underscores in
+      // your database name.
+      if (!empty($args['db-url'])) {
+        $url = parse_url($args['db-url']);
+
+        if ($url) {
+          $url = (object)array_map('urldecode', array_filter($url));
+
+          $replaces += [
+            '{{ db_driver }}' => 'mysql',
+            '{{ db_host }}' => '127.0.0.1',
+            '{{ db_port }}' => '3306',
+            '{{ db_prefix }}' => '',
+          ];
+
+          $required_parts = [
+            'path',
+            'user',
+            'pass',
+          ];
+
+          foreach ($required_parts as $part) {
+            if (empty($url->{$part})) {
+              $io->write("<error>Invalid database url: '$part' not found. </error>");
+              exit();
+            }
+          }
+
+          $replaces += ['{{ db_name }}' => ltrim($url->path, '/')];
+          $replaces += ['{{ db_user }}' => $url->user];
+          $replaces += ['{{ db_password }}' => $url->pass];
+
+          if (!empty($url->driver)) {
+            $replaces += ['{{ db_driver }}' => $url->scheme];
+          }
+          if (!empty($url->host)) {
+            $replaces += ['{{ db_host }}' => $url->host];
+          }
+          if (!empty($url->port)) {
+            $replaces += ['{{ db_port }}' => $url->port];
+          }
+
+          $io->write(strtr("Using <info>{{ db_driver }}://{{ db_user }}:[db_pass_hidden]@{{ db_host }}:{{ db_port }}/{{ db_name }}</info> as database connection info.", $replaces));
+        }
+        else {
+          $io->write("<error>Invalid database url.</error>");
+          exit();
+        }
+      }
+      else {
+        $replaces += ['{{ db_driver }}' => $io->askAndValidate('Enter the database driver (Default: mysql): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, 'mysql')];
+        $replaces += ['{{ db_host }}' => $io->ask('Enter the database host (Default: 127.0.0.1): ', '127.0.0.1')];
+        $replaces += ['{{ db_port }}' => $io->ask('Enter the database port (Default: 3306): ', '3306')];
+        $replaces += ['{{ db_prefix }}' => $io->askAndValidate('Enter the database prefix (Default is empty): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, '')];
+        $replaces += ['{{ db_name }}' => $io->askAndValidate('Enter the database name (Default: ' . $site_name . '): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, $site_name)];
+        $replaces += ['{{ db_user }}' => $io->askAndValidate('Enter the database user (Default: ' . $site_name . '): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, $site_name)];
+        $replaces += ['{{ db_password }}' => $io->askAndHideAnswer('Enter the database password (hidden): ')];
+      }
+
+      if (isset($replaces['{{ db_password }}'])) {
+        $replaces += ['{{ hash_salt }}' => Crypt::hashBase64($site_name . date('dDjzWL T', time()) . $replaces['{{ db_password }}'])];
+      }
+
       $fs->copy($example_path, $result_path);
       static::fileSearchReplace($result_path, $replaces);
       $fs->chmod($result_path, 0640);
@@ -535,5 +596,4 @@ class ScriptHandler {
       exit(1);
     }
   }
-
 }
