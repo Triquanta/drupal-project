@@ -7,7 +7,6 @@
 
 namespace DrupalProject\composer;
 
-use Composer\IO\IOInterface;
 use Composer\Script\Event;
 use Composer\Semver\Comparator;
 use Drupal\Component\Utility\Crypt;
