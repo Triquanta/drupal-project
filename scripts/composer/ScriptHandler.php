@@ -93,12 +93,14 @@ class ScriptHandler {
     $io = $event->getIO();
     $docroot = static::getDrupalRoot(getcwd());
 
+    // Available profiles.
     $profiles = array(
       'minimal',
       'standard',
       'testing',
     );
 
+    // Human readable profile selection options.
     $profiles_options = array(
       'minimal',
       '<question>standard (Default, press enter to continue)</question>',
@@ -116,12 +118,14 @@ class ScriptHandler {
     $site_mail = $io->askAndValidate('Enter the sitewide mail (Default: beheer@triquanta.nl): ', 'DrupalProject\composer\ScriptHandler::validateMail', NULL, 'beheer@triquanta.nl');
     $profile_key = $io->select('Select the install profile: ', $profiles_options, 1);
 
-    if ($profile_key == 3){
+    // If the 'manual enter' option is chosen present a new input.
+    if ($profile_key == 3) {
       $selected_profile = $io->askAndValidate('Choose and enter a profile name: ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, '');
     }
     else {
       $selected_profile = $profiles[$profile_key];
     }
+    
     $io->write('Your Drupal site is being installed, please wait ...');
 
     // Execute Drush site install.
@@ -302,7 +306,7 @@ class ScriptHandler {
       $io->write("Found existing settings file: <info>$result_path</info>.");
     }
     else {
-      $io->write("<error>Couldn't prepare settings.</error>.");
+      $io->write("<error>Couldn't prepare settings. Did you remove './docroot/sites/default/example_template.settings.php'?</error>.");
     }
 
     // Prepare the database settings file.
