@@ -98,10 +98,12 @@ class ScriptHandler {
       'standard',
       'testing',
     );
+
     $profiles_options = array(
       'minimal',
       '<question>standard (Default, press enter to continue)</question>',
       'testing',
+      'manually enter (a profile as defined and downloaded via the composer.json)',
     );
 
     // First prepare our file structure.
@@ -114,11 +116,17 @@ class ScriptHandler {
     $site_mail = $io->askAndValidate('Enter the sitewide mail (Default: beheer@triquanta.nl): ', 'DrupalProject\composer\ScriptHandler::validateMail', NULL, 'beheer@triquanta.nl');
     $profile_key = $io->select('Select the install profile: ', $profiles_options, 1);
 
+    if ($profile_key == 3){
+      $selected_profile = $io->askAndValidate('Choose and enter a profile name: ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, '');
+    }
+    else {
+      $selected_profile = $profiles[$profile_key];
+    }
     $io->write('Your Drupal site is being installed, please wait ...');
 
     // Execute Drush site install.
     // Prepend $site_name with a $ to allow for single quotes in the name.
-    exec("vendor/drush/drush/drush --account-mail=$account_mail --account-name='$account_name' --account-pass='$account_pass' --site-mail=$site_mail --site-name=$'$site_hrn' --root='$docroot' --yes site-install $profiles[$profile_key] install_configure_form.update_status_module='array\(FALSE,FALSE\)'", $output);
+    exec("vendor/drush/drush/drush --account-mail=$account_mail --account-name='$account_name' --account-pass='$account_pass' --site-mail=$site_mail --site-name='$site_hrn' --root='$docroot' --yes site-install $selected_profile install_configure_form.update_status_module='array\(FALSE,FALSE\)'", $output);
 
     $io->write('Your new Drupal site will now open in your browser using a one time login link.');
 
@@ -359,7 +367,7 @@ class ScriptHandler {
         $replaces += ['{{ db_driver }}' => $io->askAndValidate('Enter the database driver (Default: mysql): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, 'mysql')];
         $replaces += ['{{ db_host }}' => $io->ask('Enter the database host (Default: 127.0.0.1): ', '127.0.0.1')];
         $replaces += ['{{ db_port }}' => $io->ask('Enter the database port (Default: 3306): ', '3306')];
-        $replaces += ['{{ db_prefix }}' => $io->askAndValidate('Enter the database prefix (Default is empty): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, '')];
+        $replaces += ['{{ db_prefix }}' => $io->ask('Enter the database prefix (Default is empty): ', '')];
         $replaces += ['{{ db_name }}' => $io->askAndValidate('Enter the database name (Default: ' . $site_name . '): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, $site_name)];
         $replaces += ['{{ db_user }}' => $io->askAndValidate('Enter the database user (Default: ' . $site_name . '): ', 'DrupalProject\composer\ScriptHandler::validateGenericName', NULL, $site_name)];
         $replaces += ['{{ db_password }}' => $io->askAndHideAnswer('Enter the database password (hidden): ')];
