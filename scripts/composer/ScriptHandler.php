@@ -125,7 +125,7 @@ class ScriptHandler {
     else {
       $selected_profile = $profiles[$profile_key];
     }
-    
+
     $io->write('Your Drupal site is being installed, please wait ...');
 
     // Execute Drush site install.
@@ -348,7 +348,7 @@ class ScriptHandler {
 
           $replaces += ['{{ db_name }}' => ltrim($url->path, '/')];
           $replaces += ['{{ db_user }}' => $url->user];
-          $replaces += ['{{ db_password }}' => $url->pass];
+          $replaces += ['{{ db_password }}' => str_replace(array("\r", "\n"), '', $url->pass)];
 
           if (!empty($url->driver)) {
             $replaces += ['{{ db_driver }}' => $url->scheme];
@@ -423,8 +423,13 @@ class ScriptHandler {
     $example_path = $project_root . '/drush/drushrc.example_template.php';
     $result_exists = $fs->exists($result_path);
     if (!$result_exists && $fs->exists($example_path) && empty($args['skip_drushrc'])) {
-      // Ask the domain name.
-      $domain_name = $io->askAndValidate('Enter the domain name for the site on this environment, press <enter> to use: http://' . $site_name_uri . '.localhost: ', 'DrupalProject\composer\ScriptHandler::validateDomainName', NULL, 'http://' . $site_name_uri . '.localhost');
+      if (!empty($args['url'])) {
+        $domain_name = $args['url'];
+      }
+      else {
+        // Ask the domain name.
+        $domain_name = $io->askAndValidate('Enter the domain name for the site on this environment, press <enter> to use: http://' . $site_name_uri . '.localhost: ', 'DrupalProject\composer\ScriptHandler::validateDomainName', NULL, 'http://' . $site_name_uri . '.localhost');
+      }
       // Add domain name result to replaces map.
       $replaces += ['{{ domain_name }}' => $domain_name];
       $fs->copy($example_path, $result_path);
