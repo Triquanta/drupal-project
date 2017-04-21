@@ -43,7 +43,7 @@ composer install
 
 Note, this will by default also install all development dependencies. To skip development dependencies append `--no-dev` to the `composer install` command.
 
-After first install, composer will clean up unnecessary Drupal file (eg. CHANTELOG.txt).
+After first install, composer will clean up unnecessary Drupal files (e.g. CHANGELOG.txt).
 
 Answer `Y` when asked to delete the .git directory, which will effectively disconnect your project from its Triquanta/drupal-project origin. Next, initialize a new git repository for this specific project:
 ```
@@ -51,11 +51,11 @@ git init
 git add .
 git commit -m "Initial commit based on github.com/Triquanta/drupal-project"
 ```
-Now you can do whatever is appropriate for your git work flow, like initialize git flow (`git flow init`), link your new git repo to a new remote origin (`git remote add ...`), and pushing to origin.
+Now you can do whatever is appropriate for your git workflow, like initialize git flow (`git flow init`), link your new git repo to a new remote origin (`git remote add ...`), and pushing to origin.
 
 ## Install a website
 
-First make sure you already have a working local empty MySql database prepared.
+First make sure you already have a working local empty MySQL database prepared.
 
 Then a fresh standard Drupal site can then be installed by executing:
 
@@ -73,7 +73,7 @@ The wizard will ask your input, but will skip parts of the setup that are detect
 
 This step is also performed during a `composer drupal-install`, so can be skipped if you have used, or will use, that command.
 
-To only prepare the Drupal project file structure and configuration files (and not install a fresh site), use the following command:   
+To only prepare the Drupal project file structure and configuration files (and not install a fresh site), use the following command:
 
 ```
 composer drupal-prepare
@@ -105,7 +105,7 @@ If you choose `dev` as environment during `composer drupal-install` or `composer
 
 All modules available on drupal.org can be easily added via the following procedure. For modules and libraries not found on drupal.org see the FAQ below.
 
-1. From the repository root use the folling command:  
+1. From the repository root use the following command:
    `composer require "drupal/module_name:^x.y"`  
    Replace module_name with the modules system name. And replace x.y with the semantic version number you want (major.minor).
 2. Then go to the docroot and enable the module.  
@@ -242,8 +242,7 @@ If you need to apply patches (depending on the project being modified, a pull
 request is often a better solution), you can do so with the 
 [composer-patches](https://github.com/cweagans/composer-patches) plugin.
 
-To add a patch to drupal module foobar insert the patches section in the extra 
-section of composer.json:
+To add a patch to drupal module _foobar_ insert the patches section in the extra section of composer.json:
 
 ```json
 "extra": {
@@ -259,14 +258,14 @@ section of composer.json:
 
 Although composer is not meant for handling non-php packages, we can use it to
 manage external Javascript libraries. But note that it is a bit more elaborate
-to setup.
+to set up.
 
 This template can handle packages of the type `drupal-library` and will place
 the packages in `docroot/libraries`, because for most contrib modules this is
 one of the folders that will be searched. A sub-folder `contrib` is often not
 supported, so we also don't use it.
 
-To add a library you need to insert a new `package` definition under `reposities`
+To add a library you need to insert a new `package` definition under `repositories`
 in your composer.json file.
 
 ```json
