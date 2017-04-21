@@ -281,7 +281,7 @@ class ScriptHandler {
     if (!$result_exists && $fs->exists($example_path)) {
       $fs->copy($example_path, $result_path);
       static::fileSearchReplace($result_path, $replaces);
-      $fs->chmod($result_path, 0640);
+      $fs->chmod($result_path, 0644);
       $permissions_changed = TRUE;
       $io->write("Created a $result_path file with mode 0640.");
       $io->write("<warning>Review and update sites.php later, to make sure all domain names will work.</warning>");
