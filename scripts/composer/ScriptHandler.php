@@ -283,7 +283,7 @@ class ScriptHandler {
       static::fileSearchReplace($result_path, $replaces);
       $fs->chmod($result_path, 0644);
       $permissions_changed = TRUE;
-      $io->write("Created a $result_path file with mode 0640.");
+      $io->write("Created a $result_path file with mode 0644.");
       $io->write("<warning>Review and update sites.php later, to make sure all domain names will work.</warning>");
     }
     elseif ($result_exists) {
